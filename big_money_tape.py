@@ -205,58 +205,67 @@ def discover_markets():
         "startTimeMax": (now + timedelta(days=3)).isoformat().replace("+00:00", "Z"),
     }
     found = {}
+    found_events = {}
     successful_request = False
-    with connect_db() as conn:
-        for league in LEAGUES:
-            try:
-                params = dict(params_base, tagSlug=league)
-                events = _request_events(params)
-                successful_request = True
-            except Exception as exc:
-                log(f"discovery {league} failed: {exc}")
-                mark_error("market_discovery", f"{league}: {exc}")
+    # Complete network discovery before opening a database transaction. A slow
+    # upstream retry must never hold SQLite's writer lock and block feed reads.
+    for league in LEAGUES:
+        try:
+            params = dict(params_base, tagSlug=league)
+            events = _request_events(params)
+            successful_request = True
+        except Exception as exc:
+            log(f"discovery {league} failed: {exc}")
+            mark_error("market_discovery", f"{league}: {exc}")
+            continue
+        for event in events:
+            event_slug = event.get("slug")
+            if not event_slug:
                 continue
-            for event in events:
-                event_slug = event.get("slug")
-                if not event_slug:
+            found_events[event_slug] = (
+                event_slug,
+                event.get("title", event_slug),
+                league,
+                event.get("startTime") or event.get("eventDate"),
+                _iso(None),
+            )
+            for market in event.get("markets", []):
+                market_type = (market.get("marketType") or "").lower()
+                # The US gateway currently reports `closed: true` even for
+                # active same-day app markets, so it is not reliable here.
+                if market_type not in STANDARD_TYPES:
                     continue
-                conn.execute("""INSERT INTO events VALUES (?,?,?,?,?)
-                  ON CONFLICT(event_slug) DO UPDATE SET title=excluded.title,
-                  league=excluded.league,start_time=excluded.start_time,
-                  last_seen=excluded.last_seen""",
-                  (event_slug, event.get("title", event_slug), league,
-                   event.get("startTime") or event.get("eventDate"), _iso(None)))
-                for market in event.get("markets", []):
-                    market_type = (market.get("marketType") or "").lower()
-                    # The US gateway currently reports `closed: true` even for
-                    # active same-day app markets, so it is not reliable here.
-                    if market_type not in STANDARD_TYPES:
-                        continue
-                    slug = market.get("slug")
-                    if not slug:
-                        continue
-                    sides = market.get("marketSides") or []
-                    long_label = next((s.get("description") for s in sides
-                                       if s.get("long") is True), None)
-                    short_label = next((s.get("description") for s in sides
-                                        if s.get("long") is False), None)
-                    long_label = long_label or (market.get("marketMetadata") or {}).get("outcome") or "Yes"
-                    short_label = short_label or "No"
-                    meta = {
-                        "market_slug": slug, "event_slug": event_slug,
-                        "event_title": event.get("title", event_slug),
-                        "league": league, "question": market.get("question", ""),
-                        "market_type": market_type, "long_label": long_label,
-                        "short_label": short_label,
-                    }
-                    found[slug] = meta
-                    conn.execute("""INSERT INTO markets VALUES (?,?,?,?,?,?,?)
-                      ON CONFLICT(market_slug) DO UPDATE SET
-                      event_slug=excluded.event_slug,question=excluded.question,
-                      market_type=excluded.market_type,long_label=excluded.long_label,
-                      short_label=excluded.short_label,last_seen=excluded.last_seen""",
-                      (slug, event_slug, meta["question"], market_type,
-                       long_label, short_label, _iso(None)))
+                slug = market.get("slug")
+                if not slug:
+                    continue
+                sides = market.get("marketSides") or []
+                long_label = next((s.get("description") for s in sides
+                                   if s.get("long") is True), None)
+                short_label = next((s.get("description") for s in sides
+                                    if s.get("long") is False), None)
+                long_label = long_label or (market.get("marketMetadata") or {}).get("outcome") or "Yes"
+                short_label = short_label or "No"
+                found[slug] = {
+                    "market_slug": slug, "event_slug": event_slug,
+                    "event_title": event.get("title", event_slug),
+                    "league": league, "question": market.get("question", ""),
+                    "market_type": market_type, "long_label": long_label,
+                    "short_label": short_label,
+                }
+
+    with connect_db() as conn:
+        conn.executemany("""INSERT INTO events VALUES (?,?,?,?,?)
+          ON CONFLICT(event_slug) DO UPDATE SET title=excluded.title,
+          league=excluded.league,start_time=excluded.start_time,
+          last_seen=excluded.last_seen""", found_events.values())
+        conn.executemany("""INSERT INTO markets VALUES (?,?,?,?,?,?,?)
+          ON CONFLICT(market_slug) DO UPDATE SET
+          event_slug=excluded.event_slug,question=excluded.question,
+          market_type=excluded.market_type,long_label=excluded.long_label,
+          short_label=excluded.short_label,last_seen=excluded.last_seen""",
+          ((slug, meta["event_slug"], meta["question"], meta["market_type"],
+            meta["long_label"], meta["short_label"], _iso(None))
+           for slug, meta in found.items()))
         conn.commit()
     with _market_lock:
         _market_map.update(found)

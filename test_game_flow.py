@@ -1,7 +1,13 @@
 import json
 import subprocess
+import tempfile
+import threading
+import time
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+import big_money_tape
 
 
 HERE = Path(__file__).parent
@@ -74,6 +80,52 @@ class GameFlowGroupingTests(unittest.TestCase):
             [buy["risk_usd"] for buy in game["buys"]["Yankees"]], [90, 20])
         self.assertEqual(
             [buy["risk_usd"] for buy in game["buys"]["Red Sox"]], [70])
+
+
+class FeedAvailabilityTests(unittest.TestCase):
+    def test_market_discovery_network_wait_does_not_block_snapshot(self):
+        first_request_complete = threading.Event()
+        release_later_request = threading.Event()
+        event = {
+            "slug": "test-game",
+            "title": "Away vs. Home",
+            "markets": [{
+                "slug": "test-market",
+                "marketType": "moneyline",
+                "question": "Will Away win?",
+                "marketSides": [],
+            }],
+        }
+        calls = 0
+
+        def request_events(_params):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                first_request_complete.set()
+                return [event]
+            release_later_request.wait(timeout=2)
+            return []
+
+        with tempfile.TemporaryDirectory() as directory:
+            database = Path(directory) / "tape.db"
+            with patch.object(big_money_tape, "DB_FILE", database), \
+                    patch.object(big_money_tape, "LEAGUES", ("mlb", "nfl")), \
+                    patch.object(big_money_tape, "_request_events", request_events), \
+                    patch.object(big_money_tape, "mark_success"), \
+                    patch.object(big_money_tape, "log"):
+                big_money_tape.init_db()
+                worker = threading.Thread(target=big_money_tape.discover_markets)
+                worker.start()
+                self.assertTrue(first_request_complete.wait(timeout=1))
+                started = time.monotonic()
+                big_money_tape.snapshot()
+                elapsed = time.monotonic() - started
+                release_later_request.set()
+                worker.join(timeout=2)
+
+        self.assertLess(elapsed, 0.5)
+        self.assertFalse(worker.is_alive())
 
     def test_multiple_games_sort_by_recent_activity(self):
         rows = [
