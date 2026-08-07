@@ -1,0 +1,20 @@
+[
+  {
+    "id": "odds-pit-bal",
+    "sport_key": "americanfootball_nfl",
+    "commence_time": "2026-08-14T23:35:00Z",
+    "home_team": "Baltimore Ravens",
+    "away_team": "Pittsburgh Steelers",
+    "bookmakers": [{
+      "key": "fictionalbook",
+      "last_update": "2026-08-14T20:00:00Z",
+      "markets": [{
+        "key": "h2h",
+        "outcomes": [
+          {"name": "Pittsburgh Steelers", "price": 2.1},
+          {"name": "Baltimore Ravens", "price": 1.8}
+        ]
+      }]
+    }]
+  }
+]

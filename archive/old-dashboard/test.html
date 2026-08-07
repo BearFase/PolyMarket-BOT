@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard API Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #0a0e27; color: #fff; }
+        pre { background: #1e2139; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        .error { color: #ff4444; }
+        .success { color: #44ff44; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard API Test</h1>
+    <div id="status"></div>
+    <h2>Paper Trading API Response:</h2>
+    <pre id="paper-output">Loading...</pre>
+    
+    <h2>Dashboard API Response:</h2>
+    <pre id="data-output">Loading...</pre>
+    
+    <script>
+        async function testAPIs() {
+            const status = document.getElementById('status');
+            
+            try {
+                // Test paper trading API
+                const paperResp = await fetch('http://localhost:8081/api/paper-trading');
+                const paperData = await paperResp.json();
+                document.getElementById('paper-output').textContent = JSON.stringify(paperData, null, 2);
+                document.getElementById('paper-output').className = 'success';
+                
+                // Test main data API
+                const dataResp = await fetch('http://localhost:8081/api/data');
+                const data = await dataResp.json();
+                document.getElementById('data-output').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('data-output').className = 'success';
+                
+                status.innerHTML = '<p class="success">✓ Both APIs working</p>';
+                status.innerHTML += '<p>Positions found: ' + paperData.positions.length + '</p>';
+                status.innerHTML += '<p>Open positions stat: ' + paperData.stats.open_positions + '</p>';
+                
+            } catch (error) {
+                status.innerHTML = '<p class="error">✗ Error: ' + error.message + '</p>';
+                console.error(error);
+            }
+        }
+        
+        testAPIs();
+    </script>
+</body>
+</html>

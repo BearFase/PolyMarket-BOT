@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymarket Bot Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #1e88e5;
+            padding-bottom: 20px;
+        }
+        
+        h1 {
+            color: #1e88e5;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: #1a1f3a;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 200px;
+            border-left: 4px solid #1e88e5;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .stat-value.positive {
+            color: #4caf50;
+        }
+        
+        .stat-value.negative {
+            color: #f44336;
+        }
+        
+        .stat-value.neutral {
+            color: #ffc107;
+        }
+        
+        .section {
+            background: #1a1f3a;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            color: #1e88e5;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        .alert {
+            background: #ff5722;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .warning {
+            background: #ff9800;
+        }
+        
+        .info {
+            background: #2196f3;
+        }
+        
+        .edge-card, .position-card, .whale-card {
+            background: #0d1428;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .position-card.real {
+            border-left-color: #ffc107;
+        }
+        
+        .position-card.paper {
+            border-left-color: #2196f3;
+        }
+        
+        .edge-title, .position-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .edge-details, .position-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.85em;
+            color: #888;
+        }
+        
+        .detail-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .buy-signal {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+        
+        .countdown {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .countdown-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .countdown-timer {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .link {
+            color: #1e88e5;
+            text-decoration: none;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge.real {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .badge.paper {
+            background: #2196f3;
+            color: #fff;
+        }
+        
+        @media (max-width: 768px) {
+            .status-bar {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .countdown-timer {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Polymarket Bot Dashboard</h1>
+            <p style="color: #4caf50; font-weight: bold;">🔴 LIVE - Real Money Positions</p>
+            <p style="font-size: 0.9em; color: #888;">Synced from Polymarket US API</p>
+        </header>
+        
+        <div id="countdown-container"></div>
+        <div id="alerts-container"></div>
+        
+        <div class="status-bar">
+            <div class="stat-card">
+                <div class="stat-label">Total P&L</div>
+                <div class="stat-value" id="total-pnl">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Open Positions</div>
+                <div class="stat-value neutral" id="open-positions">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Exposure</div>
+                <div class="stat-value neutral" id="exposure">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Win Rate</div>
+                <div class="stat-value" id="win-rate">--</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">🎯 Current Sports Edges</h2>
+            <div id="edges-container"></div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">💼 Open Positions</h2>
+            <div id="positions-container"></div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">🐋 Whale Activity (>$50k positions)</h2>
+            <div id="whales-container"></div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">📈 Recent Closed Trades</h2>
+            <div id="history-container"></div>
+        </div>
+        
+        <div class="last-updated" id="last-updated">
+            Loading data...
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+        const WORLD_CUP_FINAL = new Date('2026-07-19T19:00:00Z'); // 3pm ET = 7pm UTC
+        
+        // Load and display data
+        async function loadData() {
+            try {
+                // Load REAL positions from API sync
+                const stateResponse = await fetch('real_positions.json?t=' + Date.now());
+                const state = await stateResponse.json();
+                
+                // Load sports edges
+                const edgesResponse = await fetch('sports_edges.json?t=' + Date.now());
+                const edges = await edgesResponse.json();
+                
+                // Load whale data
+                const whaleResponse = await fetch('whale_data.json?t=' + Date.now());
+                const whales = await whaleResponse.json();
+                
+                // Update dashboard
+                updateStats(state);
+                updateEdges(edges);
+                updatePositions(state);
+                updateWhales(whales);
+                updateHistory(state);
+                updateCountdown();
+                updateAlerts(state, edges);
+                
+                const lastSync = state.last_sync ? new Date(state.last_sync).toLocaleString() : 'Never';
+                document.getElementById('last-updated').textContent = 
+                    `Dashboard: ${new Date().toLocaleString()} | Last API Sync: ${lastSync} (auto-refresh: 30s)`;
+                    
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('last-updated').textContent = 
+                    `Error loading data: ${error.message}`;
+            }
+        }
+        
+        function updateStats(state) {
+            const totalPnl = state.total_pnl || 0;
+            const positions = state.positions || [];
+            const history = state.history || [];
+            
+            // Total P&L
+            const pnlEl = document.getElementById('total-pnl');
+            pnlEl.textContent = `$${totalPnl.toFixed(2)}`;
+            pnlEl.className = 'stat-value ' + (totalPnl > 0 ? 'positive' : totalPnl < 0 ? 'negative' : 'neutral');
+            
+            // Open positions
+            document.getElementById('open-positions').textContent = positions.length;
+            
+            // Exposure
+            const exposure = positions.reduce((sum, p) => sum + (p.size || 0), 0);
+            document.getElementById('exposure').textContent = `$${exposure.toFixed(0)} / $500`;
+            
+            // Win rate
+            if (history.length > 0) {
+                const wins = history.filter(t => (t.pnl || 0) > 0).length;
+                const winRate = (wins / history.length * 100).toFixed(0);
+                const winRateEl = document.getElementById('win-rate');
+                winRateEl.textContent = `${winRate}%`;
+                winRateEl.className = 'stat-value ' + (winRate >= 60 ? 'positive' : winRate >= 40 ? 'neutral' : 'negative');
+            } else {
+                document.getElementById('win-rate').textContent = 'N/A';
+            }
+        }
+        
+        function updateEdges(edges) {
+            const container = document.getElementById('edges-container');
+            
+            if (!edges.edges || edges.edges.length === 0) {
+                container.innerHTML = '<div class="empty-state">No edges found. Check back at next scan.</div>';
+                return;
+            }
+            
+            container.innerHTML = edges.edges.map(edge => `
+                <div class="edge-card">
+                    <div class="edge-title">
+                        ${edge.market}
+                        <span class="buy-signal">BUY ${edge.team || 'YES'}</span>
+                    </div>
+                    <div class="edge-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Polymarket</span>
+                            <span class="detail-value">${edge.polymarket_prob.toFixed(1)}%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Consensus</span>
+                            <span class="detail-value">${edge.consensus_prob.toFixed(1)}%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Edge</span>
+                            <span class="detail-value buy-signal">+${edge.edge_pct.toFixed(1)}%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Liquidity</span>
+                            <span class="detail-value">$${(edge.liquidity / 1000000).toFixed(1)}M</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <a href="${edge.url}" target="_blank" class="link">View on Polymarket →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updatePositions(state) {
+            const container = document.getElementById('positions-container');
+            const positions = state.positions || [];
+            
+            if (positions.length === 0) {
+                container.innerHTML = '<div class="empty-state">No open positions. <a href="#" onclick="refreshNow(); return false;" style="color: #1e88e5;">Refresh now</a></div>';
+                return;
+            }
+            
+            container.innerHTML = positions.map(pos => {
+                const pnl = pos.pnl || 0;
+                const costBasis = pos.cost_basis || pos.size;
+                const pnlPercent = costBasis ? (pnl / costBasis * 100).toFixed(1) : 0;
+                const isPaper = pos.id && pos.id.startsWith('paper');
+                const side = pos.side || 'UNKNOWN';
+                const sideClass = side === 'LONG' ? 'buy-signal' : side === 'SHORT' ? 'sell-signal' : '';
+                const maxProfit = pos.max_profit || 0;
+                const maxLoss = pos.max_loss || 0;
+                
+                return `
+                    <div class="position-card ${isPaper ? 'paper' : 'real'}">
+                        <div class="position-title">
+                            ${pos.market}
+                            <span class="badge ${isPaper ? 'paper' : 'real'}">${isPaper ? 'PAPER' : 'REAL'}</span>
+                            <span class="badge ${sideClass}" style="margin-left: 5px;">${side}</span>
+                        </div>
+                        ${pos.bet_type ? `<div style="font-size: 0.85em; color: #888; margin: 5px 0;">${pos.bet_type}</div>` : ''}
+                        <div class="position-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Outcome</span>
+                                <span class="detail-value">${pos.outcome}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Entry</span>
+                                <span class="detail-value">${(pos.entry_price * 100).toFixed(1)}¢ → ${(pos.current_price * 100).toFixed(1)}¢</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Contracts</span>
+                                <span class="detail-value">${pos.contracts ? pos.contracts.toFixed(2) : pos.size}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">P&L</span>
+                                <span class="detail-value ${pnl > 0 ? 'buy-signal' : pnl < 0 ? 'sell-signal' : ''}">${pnl > 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPercent > 0 ? '+' : ''}${pnlPercent}%)</span>
+                            </div>
+                            ${maxProfit || maxLoss ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Max Profit</span>
+                                <span class="detail-value buy-signal">+$${maxProfit.toFixed(2)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Max Loss</span>
+                                <span class="detail-value sell-signal">-$${maxLoss.toFixed(2)}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateWhales(whales) {
+            const container = document.getElementById('whales-container');
+            
+            if (!whales.active_whales || whales.active_whales.length === 0) {
+                container.innerHTML = '<div class="empty-state">No significant whale activity (>$50k positions) in last 7 days</div>';
+                return;
+            }
+            
+            container.innerHTML = whales.active_whales.map(whale => {
+                if (!whale.positions || whale.positions.length === 0) return '';
+                
+                return whale.positions.map(pos => `
+                    <div class="whale-card">
+                        <div class="edge-title">
+                            ${pos.market}
+                            <span style="font-size: 0.8em; color: #888; margin-left: 10px;">
+                                by ${whale.name} ($${(whale.total_pnl / 1000000).toFixed(1)}M all-time)
+                            </span>
+                        </div>
+                        <div class="edge-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Outcome</span>
+                                <span class="detail-value">${pos.outcome}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Position Size</span>
+                                <span class="detail-value">$${(pos.size / 1000).toFixed(0)}k</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Entry Avg</span>
+                                <span class="detail-value">${(pos.entry_avg * 100).toFixed(0)}¢</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Current</span>
+                                <span class="detail-value">${(pos.current_price * 100).toFixed(0)}¢</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }).join('');
+        }
+        
+        function updateHistory(state) {
+            const container = document.getElementById('history-container');
+            const history = state.history || [];
+            
+            if (history.length === 0) {
+                container.innerHTML = '<div class="empty-state">No closed trades yet</div>';
+                return;
+            }
+            
+            const recent = history.slice(-5).reverse();
+            
+            container.innerHTML = recent.map(trade => {
+                const pnl = trade.pnl || 0;
+                const result = trade.result || (pnl > 0 ? 'WIN' : pnl < 0 ? 'LOSS' : 'BREAK-EVEN');
+                const isPaper = trade.id && trade.id.startsWith('paper');
+                
+                return `
+                    <div class="position-card ${isPaper ? 'paper' : 'real'}">
+                        <div class="position-title">
+                            ${trade.market}
+                            <span class="badge ${isPaper ? 'paper' : 'real'}">${isPaper ? 'PAPER' : 'REAL'}</span>
+                            <span style="margin-left: 10px; color: ${pnl > 0 ? '#4caf50' : pnl < 0 ? '#f44336' : '#ffc107'}">${result}</span>
+                        </div>
+                        <div class="position-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Outcome</span>
+                                <span class="detail-value">${trade.outcome}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Entry → Exit</span>
+                                <span class="detail-value">${(trade.entry_price * 100).toFixed(1)}¢ → ${(trade.exit_price * 100).toFixed(1)}¢</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">P&L</span>
+                                <span class="detail-value ${pnl > 0 ? 'buy-signal' : ''}">${pnl > 0 ? '+' : ''}$${pnl.toFixed(2)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Notes</span>
+                                <span class="detail-value" style="font-size: 0.9em;">${trade.notes || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateCountdown() {
+            const now = new Date();
+            const diff = WORLD_CUP_FINAL - now;
+            
+            if (diff < 0) {
+                document.getElementById('countdown-container').innerHTML = `
+                    <div class="countdown">
+                        <div class="countdown-title">⚽ World Cup 2026 Final - COMPLETE</div>
+                        <div style="font-size: 1.2em; margin-top: 10px;">Argentina vs Spain</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            document.getElementById('countdown-container').innerHTML = `
+                <div class="countdown">
+                    <div class="countdown-title">⚽ World Cup 2026 Final - Argentina vs Spain</div>
+                    <div class="countdown-timer">${hours}h ${minutes}m</div>
+                    <div>Saturday, July 19 at 3:00 PM ET</div>
+                </div>
+            `;
+        }
+        
+        function updateAlerts(state, edges) {
+            const container = document.getElementById('alerts-container');
+            const alerts = [];
+            
+            // Check for Argentina position with imminent expiry
+            const hasArgentina = (state.positions || []).some(p => 
+                p.market && p.market.toLowerCase().includes('argentina') && p.market.toLowerCase().includes('world cup')
+            );
+            
+            const hoursUntilFinal = (WORLD_CUP_FINAL - new Date()) / (1000 * 60 * 60);
+            
+            if (hasArgentina && hoursUntilFinal > 0 && hoursUntilFinal < 48) {
+                alerts.push(`
+                    <div class="alert warning">
+                        ⚠️ Argentina World Cup position resolves in ${Math.floor(hoursUntilFinal)} hours! Monitor price action closely.
+                    </div>
+                `);
+            }
+            
+            // Check for high-edge opportunities
+            if (edges.edges && edges.edges.some(e => e.edge_pct > 8)) {
+                alerts.push(`
+                    <div class="alert info">
+                        🎯 High-edge opportunity available (>8%)! Check Current Sports Edges section.
+                    </div>
+                `);
+            }
+            
+            container.innerHTML = alerts.join('');
+        }
+        
+        // Manual refresh function
+        function refreshNow() {
+            document.getElementById('last-updated').textContent = 'Refreshing...';
+            loadData();
+        }
+        
+        // Initialize
+        loadData();
+        setInterval(loadData, REFRESH_INTERVAL);
+        setInterval(updateCountdown, 60000); // Update countdown every minute
+    </script>
+</body>
+</html>

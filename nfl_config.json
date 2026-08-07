@@ -1,0 +1,25 @@
+{
+  "nfl_schedule_sync_enabled": true,
+  "nfl_season": 2026,
+  "enabled_season_types": ["HOF", "PRE", "REG"],
+  "hall_of_fame_event_ids": ["401873271"],
+  "kickoff_match_tolerance_seconds": 1800,
+  "sportsbook_quote_max_age_seconds": 3600,
+  "nfl_edge_minimum_percentage_points": 3.0,
+  "schedule_refresh_interval_seconds": 21600,
+  "result_refresh_interval_seconds": 1800,
+  "telegram_notifications_enabled": true,
+  "telegram_morning_brief_enabled": true,
+  "telegram_morning_hour_local": 7,
+  "telegram_pregame_alerts_enabled": true,
+  "telegram_pregame_minutes_before": 60,
+  "telegram_final_alerts_enabled": true,
+  "telegram_system_warnings_enabled": true,
+  "telegram_warning_cooldown_minutes": 180,
+  "telegram_timezone": "America/Los_Angeles",
+  "adapters": {
+    "espn_schedule": true,
+    "odds_api": true,
+    "polymarket_us": true
+  }
+}

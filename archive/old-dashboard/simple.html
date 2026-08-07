@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Polymarket - Paper Trades</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0e27;
+            color: white;
+            padding: 20px;
+        }
+        .position {
+            background: #1e2139;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .market { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .details { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .stat { }
+        .label { opacity: 0.7; font-size: 12px; }
+        .value { font-size: 20px; margin-top: 5px; }
+        .green { color: #10dc60; }
+        .red { color: #f04141; }
+    </style>
+</head>
+<body>
+    <h1>Paper Trading Positions</h1>
+    <div id="positions">Loading...</div>
+    
+    <script>
+        fetch('http://localhost:8081/api/paper-trading')
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById('positions');
+                const positions = data.positions || [];
+                
+                if (positions.length === 0) {
+                    container.innerHTML = '<p>No positions found</p>';
+                    return;
+                }
+                
+                container.innerHTML = positions.map(p => `
+                    <div class="position">
+                        <div class="market">${p.market}</div>
+                        <div class="details">
+                            <div class="stat">
+                                <div class="label">Outcome</div>
+                                <div class="value">${p.outcome}</div>
+                            </div>
+                            <div class="stat">
+                                <div class="label">Size</div>
+                                <div class="value">$${p.size}</div>
+                            </div>
+                            <div class="stat">
+                                <div class="label">Entry</div>
+                                <div class="value">${(p.entry_price * 100).toFixed(0)}¢</div>
+                            </div>
+                            <div class="stat">
+                                <div class="label">Current</div>
+                                <div class="value">${((p.current_price || p.entry_price) * 100).toFixed(0)}¢</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; opacity: 0.8;">
+                            ${p.notes || ''}
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(err => {
+                document.getElementById('positions').innerHTML = 
+                    '<p style="color: red;">Error loading data: ' + err.message + '</p>';
+            });
+    </script>
+</body>
+</html>

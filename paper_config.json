@@ -1,0 +1,10 @@
+{
+  "max_position_size": 100,
+  "max_total_exposure": 500,
+  "min_whale_overlap": 2,
+  "min_whale_position_size": 50000,
+  "min_edge": 0.10,
+  "time_window_hours": 168,
+  "auto_trade": false,
+  "notify_on_trade": true
+}

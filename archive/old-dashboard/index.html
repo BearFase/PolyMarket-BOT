@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymarket Command Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #0a0e27;
+            color: #ffffff;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1e2139;
+            padding-bottom: 5px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #1e2139;
+            border: none;
+            color: #8b92b0;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .tab:hover { background: #252a47; color: #fff; }
+        .tab.active { background: #667eea; color: #fff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .position {
+            background: #1e2139;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        .market { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+        .details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .stat .label { opacity: 0.7; font-size: 12px; margin-bottom: 5px; }
+        .stat .value { font-size: 20px; font-weight: 600; }
+        .green { color: #10dc60; }
+        .red { color: #f04141; }
+        .notes {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        .empty { text-align: center; padding: 40px; opacity: 0.5; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #1e2139;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .stat-card .label { font-size: 12px; opacity: 0.7; margin-bottom: 8px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; }
+        .whale-item {
+            background: #1e2139;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .whale-name { font-weight: bold; margin-bottom: 8px; }
+        .whale-stats { font-size: 13px; opacity: 0.8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Polymarket Command Center</h1>
+        <div id="last-update" style="opacity: 0.8; font-size: 14px;">Loading...</div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('daily')">Daily Brief</button>
+        <button class="tab" onclick="showTab('paper')">Paper Trading</button>
+        <button class="tab" onclick="showTab('whales')">Whale Signals</button>
+    </div>
+
+    <!-- DAILY BRIEF TAB -->
+    <div id="daily" class="tab-content active">
+        <h2 style="margin-bottom: 15px;">🔥 Live Games Tonight</h2>
+        <div id="todays-games">Loading...</div>
+        
+        <h2 style="margin: 30px 0 15px 0;">Best Trades Today</h2>
+        <div id="daily-trades">Loading...</div>
+        
+        <h2 style="margin: 30px 0 15px 0;">Sports Futures Edges</h2>
+        <div id="sports-edges">Loading...</div>
+    </div>
+
+    <!-- PAPER TRADING TAB -->
+    <div id="paper" class="tab-content">
+        <div class="stats-grid" id="paper-stats">
+            <div class="stat-card">
+                <div class="label">Total P&L</div>
+                <div class="value" id="total-pnl">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Open Positions</div>
+                <div class="value" id="open-count">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Win Rate</div>
+                <div class="value" id="win-rate">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Exposure</div>
+                <div class="value" id="exposure">$0 / $500</div>
+            </div>
+        </div>
+        
+        <h2 style="margin: 20px 0 10px 0;">Open Positions</h2>
+        <div id="positions">Loading...</div>
+    </div>
+
+    <!-- WHALE SIGNALS TAB -->
+    <div id="whales" class="tab-content">
+        <h2 style="margin-bottom: 15px;">Active Whales (Last 7 Days)</h2>
+        <div id="whale-list">Loading...</div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            // Show selected
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadPaperTrading() {
+            fetch('http://localhost:8081/api/paper-trading')
+                .then(r => r.json())
+                .then(data => {
+                    // Update stats
+                    const stats = data.stats || {};
+                    document.getElementById('total-pnl').textContent = '$' + (stats.total_pnl || 0).toFixed(2);
+                    document.getElementById('total-pnl').className = 'value ' + ((stats.total_pnl || 0) >= 0 ? 'green' : 'red');
+                    document.getElementById('open-count').textContent = stats.open_positions || 0;
+                    document.getElementById('win-rate').textContent = (stats.win_rate || 0).toFixed(0) + '%';
+                    document.getElementById('exposure').textContent = '$' + (stats.exposure || 0) + ' / $' + (stats.max_exposure || 500);
+                    
+                    // Update positions
+                    const container = document.getElementById('positions');
+                    const positions = data.positions || [];
+                    
+                    if (positions.length === 0) {
+                        container.innerHTML = '<div class="empty">No open positions</div>';
+                    } else {
+                        container.innerHTML = positions.map(p => {
+                            const pnl = p.unrealized_pnl || 0;
+                            const pnlClass = pnl >= 0 ? 'green' : 'red';
+                            const pnlSign = pnl >= 0 ? '+' : '';
+                            
+                            return `
+                                <div class="position">
+                                    <div class="market">${p.market}</div>
+                                    <div class="details">
+                                        <div class="stat">
+                                            <div class="label">Outcome</div>
+                                            <div class="value">${p.outcome}</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="label">Size</div>
+                                            <div class="value">$${p.size}</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="label">Entry</div>
+                                            <div class="value">${(p.entry_price * 100).toFixed(0)}¢</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="label">Current</div>
+                                            <div class="value">${((p.current_price || p.entry_price) * 100).toFixed(0)}¢</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="label">P&L</div>
+                                            <div class="value ${pnlClass}">${pnlSign}$${pnl.toFixed(2)}</div>
+                                        </div>
+                                    </div>
+                                    ${p.notes ? `<div class="notes">${p.notes}</div>` : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('positions').innerHTML = 
+                        '<div class="empty" style="color: red;">Error: ' + err.message + '</div>';
+                });
+        }
+
+        function loadWhales() {
+            fetch('http://localhost:8081/api/whale-signals')
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('whale-list');
+                    const whales = data.active_whales || [];
+                    
+                    if (whales.length === 0) {
+                        container.innerHTML = '<div class="empty">No active whales in last 7 days</div>';
+                    } else {
+                        container.innerHTML = whales.map(w => {
+                            let html = `
+                                <div class="whale-item">
+                                    <div class="whale-name">${w.name}</div>
+                                    <div class="whale-stats">
+                                        All-time P&L: $${(w.all_time_pnl || 0).toLocaleString()} (${w.roi}% ROI)<br>
+                                        Open Positions: ${w.open_positions || 0}
+                                    </div>
+                            `;
+                            
+                            if (w.positions && w.positions.length > 0) {
+                                html += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">';
+                                w.positions.forEach(p => {
+                                    html += `
+                                        <div style="margin: 8px 0; font-size: 13px;">
+                                            <strong>${p.market}</strong><br>
+                                            ${p.outcome} @ ${(p.current_price * 100).toFixed(0)}¢ 
+                                            (entry: ${(p.entry_avg * 100).toFixed(0)}¢) 
+                                            | Value: $${p.value_usd.toLocaleString()}
+                                        </div>
+                                    `;
+                                });
+                                html += '</div>';
+                            }
+                            
+                            html += '</div>';
+                            return html;
+                        }).join('');
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('whale-list').innerHTML = 
+                        '<div class="empty" style="color: red;">Error: ' + err.message + '</div>';
+                });
+        }
+
+        function loadTodaysGames() {
+            fetch('http://localhost:8081/api/todays-games')
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('todays-games');
+                    const games = data.games || [];
+                    
+                    if (games.length === 0) {
+                        container.innerHTML = '<div class="empty">No games tonight</div>';
+                        return;
+                    }
+                    
+                    container.innerHTML = games.map(g => {
+                        const edge = g.edge || {};
+                        return `
+                            <div class="position" style="border: 2px solid #f5576c;">
+                                <div style="color: #f5576c; font-weight: bold; margin-bottom: 10px;">🎮 LIVE TONIGHT - ${g.sport}</div>
+                                <div class="market">${g.away_team} @ ${g.home_team}</div>
+                                <div class="details">
+                                    <div class="stat">
+                                        <div class="label">Away</div>
+                                        <div class="value">${g.away_team} ${g.away_american}</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="label">Home</div>
+                                        <div class="value">${g.home_team} ${g.home_american}</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="label">Play</div>
+                                        <div class="value green">${edge.play || 'TBD'}</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="label">Confidence</div>
+                                        <div class="value">${edge.confidence || 'medium'}</div>
+                                    </div>
+                                </div>
+                                <div class="notes">
+                                    <strong>Edge:</strong> ${edge.reason || 'N/A'}<br>
+                                    <strong>Analysis:</strong> ${edge.sharp_analysis || 'N/A'}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                })
+                .catch(err => {
+                    document.getElementById('todays-games').innerHTML = 
+                        '<div class="empty" style="color: red;">Error: ' + err.message + '</div>';
+                });
+        }
+
+        function loadDailyBrief() {
+            // Load sports edges
+            fetch('http://localhost:8081/api/sports-edges')
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('sports-edges');
+                    const edges = data.edges || [];
+                    
+                    if (edges.length === 0) {
+                        container.innerHTML = '<div class="empty">No edges found. Market is efficient.</div>';
+                    } else {
+                        container.innerHTML = edges.map(e => {
+                            return `
+                                <div class="position">
+                                    <div class="market">${e.market}</div>
+                                    <div class="details">
+                                        <div class="stat">
+                                            <div class="label">Team</div>
+                                            <div class="value">${e.team}</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="label">Polymarket</div>
+                                            <div class="value">${e.polymarket_prob}%</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="label">Consensus</div>
+                                            <div class="value">${e.consensus_prob}%</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="label">Edge</div>
+                                            <div class="value green">+${e.edge_pct}%</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="label">Signal</div>
+                                            <div class="value">${e.direction}</div>
+                                        </div>
+                                    </div>
+                                    <div class="notes">
+                                        Volume: $${(e.volume || 0).toLocaleString()} | Liquidity: $${(e.liquidity || 0).toLocaleString()}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                    
+                    // Best trade recommendation
+                    const dailyContainer = document.getElementById('daily-trades');
+                    if (edges.length > 0) {
+                        const best = edges.sort((a, b) => Math.abs(b.edge_pct) - Math.abs(a.edge_pct))[0];
+                        dailyContainer.innerHTML = `
+                            <div class="position" style="border: 2px solid #667eea;">
+                                <div style="color: #667eea; font-weight: bold; margin-bottom: 10px;">🔥 BEST TRADE TODAY</div>
+                                <div class="market">${best.market}</div>
+                                <div class="details">
+                                    <div class="stat">
+                                        <div class="label">Team</div>
+                                        <div class="value">${best.team}</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="label">Edge</div>
+                                        <div class="value green">+${best.edge_pct}%</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="label">Direction</div>
+                                        <div class="value">${best.direction}</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="label">Current Price</div>
+                                        <div class="value">${best.polymarket_prob}%</div>
+                                    </div>
+                                </div>
+                                <div class="notes">
+                                    Bookmakers think ${best.team} is ${best.consensus_prob}% likely to win, but Polymarket only has them at ${best.polymarket_prob}%. 
+                                    ${best.edge_pct}% edge means you're getting a better price than consensus.
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        dailyContainer.innerHTML = '<div class="empty">No high-conviction trades today. Check whale signals.</div>';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('sports-edges').innerHTML = 
+                        '<div class="empty" style="color: red;">Error: ' + err.message + '</div>';
+                });
+        }
+
+        // Load data
+        loadTodaysGames();
+        loadDailyBrief();
+        loadPaperTrading();
+        loadWhales();
+        document.getElementById('last-update').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadTodaysGames();
+            loadDailyBrief();
+            loadPaperTrading();
+            loadWhales();
+            document.getElementById('last-update').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+        }, 30000);
+    </script>
+</body>
+</html>

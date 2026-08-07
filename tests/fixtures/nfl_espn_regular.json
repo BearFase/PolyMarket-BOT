@@ -1,0 +1,16 @@
+{
+  "events": [{
+    "id": "401910001",
+    "name": "Kansas City Chiefs at Denver Broncos",
+    "date": "2026-09-13T20:25:00Z",
+    "status": {"type": {"name": "STATUS_SCHEDULED", "state": "pre", "completed": false}},
+    "competitions": [{
+      "neutralSite": false,
+      "venue": {"fullName": "Empower Field at Mile High"},
+      "competitors": [
+        {"homeAway": "home", "team": {"displayName": "Denver Broncos"}},
+        {"homeAway": "away", "team": {"displayName": "Kansas City Chiefs"}}
+      ]
+    }]
+  }]
+}

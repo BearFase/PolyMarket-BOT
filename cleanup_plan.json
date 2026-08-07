@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "created_for": "repository architecture consolidation",
+  "safety": {
+    "delete_user_data": false,
+    "delete_research_history": false,
+    "delete_backups": false,
+    "move_active_modules": false,
+    "commit": false,
+    "push": false
+  },
+  "canonical_entry_points": [
+    "Open Dashboard.cmd",
+    "Start All Bots.cmd",
+    "nfl_daily_update.py",
+    "health_check.py",
+    "telegram_notification_center.py",
+    "nfl_schedule.py"
+  ],
+  "actions": [
+    {
+      "action": "KEEP",
+      "group": "active application",
+      "reason": "Imported, launched, routed, scheduled, or required by active tests."
+    },
+    {
+      "action": "ARCHIVE",
+      "group": "root exploration scripts",
+      "destination": "archive/exploration",
+      "reason": "One-off diagnostics with no active production caller."
+    },
+    {
+      "action": "ARCHIVE",
+      "group": "whale research",
+      "destination": "archive/whale_watch",
+      "reason": "Explicitly retired research pipeline."
+    },
+    {
+      "action": "ARCHIVE",
+      "group": "legacy operations",
+      "destination": "archive/legacy_operations",
+      "reason": "Superseded by nfl_daily_update.py, health_check.py, bot_launcher.py, and TelegramNotificationCenter."
+    },
+    {
+      "action": "ARCHIVE",
+      "group": "legacy paper interface",
+      "destination": "archive/legacy_paper",
+      "reason": "Superseded by canonical paper_trader.py ledger and CLI."
+    },
+    {
+      "action": "KEEP",
+      "group": "runtime data",
+      "reason": "Preserve all production, research, paper, notification, Game Flow, real-position, backup, and historical data; exclude through .gitignore."
+    },
+    {
+      "action": "DELETE_GENERATED",
+      "group": "none in this pass",
+      "reason": "No generated artifact was deleted because provenance or current use could not be disproven."
+    },
+    {
+      "action": "MERGE_LATER",
+      "group": "root Python package layout",
+      "reason": "Moving active modules now would cause broad import churn without improving collected evidence."
+    }
+  ]
+}

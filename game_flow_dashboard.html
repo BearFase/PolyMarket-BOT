@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Game Flow · Polymarket US</title>
+<style>
+:root{--bg:#06070d;--card:#10131d;--line:#242a3a;--ink:#f2f5ff;--muted:#8f99ae;--up:#00e68a;--a:#38bdf8;--glass:rgba(255,255,255,.035)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(800px 400px at 10% 0,#0d2940,transparent),var(--bg);color:var(--ink);font:14px system-ui,-apple-system,"Segoe UI",sans-serif;padding:18px}
+.wrap{max-width:1100px;margin:auto}
+nav{display:flex;gap:8px;margin-bottom:22px}
+nav a{color:var(--ink);text-decoration:none;border:1px solid var(--line);padding:8px 14px;border-radius:999px}
+nav .on{background:var(--a);color:#03111b;font-weight:800}
+h1{font-size:24px;margin:0}.sub{color:var(--muted);margin:7px 0 22px}
+.summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.flow-controls{border:1px solid var(--line);background:var(--glass);border-radius:16px;padding:14px;margin:14px 0}.search-row{display:flex;gap:8px;align-items:end}.search-field{flex:1}.control-label{display:block;color:var(--muted);font-size:11px;font-weight:700;margin-bottom:5px}.search-field input,.filters select{width:100%;background:#080a10;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px 10px;font:inherit}.clear-button,.quick-button,.chip button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px 11px;cursor:pointer}.quick-views,.filters,.active-state{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}.quick-button[aria-pressed="true"]{background:var(--a);color:#03111b;font-weight:800}.filters label{min-width:135px;flex:1}.live-toggle{display:flex;align-items:center;gap:7px;min-height:38px}.active-state{align-items:center}.chip{display:inline-flex;gap:6px;align-items:center;border:1px solid #35566d;background:#102738;color:#b9e8ff;border-radius:999px;padding:5px 8px}.chip button{border:0;padding:0;color:inherit}.result-count{font-weight:800;margin-right:auto}.control-help{color:var(--muted);font-size:11px;margin-top:6px}
+.sport-select{display:flex;gap:8px;margin:12px 0}.sport-select button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer}.sport-select button.on{background:var(--a);color:#03111b;font-weight:800}
+.stat{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:10px 13px}
+.stat b{font-size:18px}.stat span{color:var(--muted);margin-left:6px;font-size:12px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.game{background:rgba(16,19,29,.9);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.game-head{padding:16px;border-bottom:1px solid var(--line)}
+.matchup{font-size:17px;font-weight:800}.market{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.14em;margin-top:4px}
+.probabilities{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+.prob{background:var(--glass);border:1px solid var(--line);border-radius:11px;padding:10px 11px;display:flex;justify-content:space-between;gap:8px}
+.prob b:last-child{color:var(--a);font-variant-numeric:tabular-nums}
+.buys{padding:15px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.buys-title{grid-column:1/-1;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.14em;margin-bottom:-3px}
+.side{min-width:0}.side-name{font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px}
+.buy{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.buy:first-of-type{border-top:0}.buy .amount{font-weight:800;color:var(--up)}.buy .price{color:var(--muted);font-size:12px}
+.none{color:var(--muted);font-size:12px;padding:7px 0}
+.game-foot{padding:11px 15px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px}
+.research-button{border:1px solid #35566d;background:#102738;color:#8dd8ff;border-radius:9px;padding:7px 10px;font-weight:750;cursor:pointer}
+.research-panel{display:none;border-top:1px solid var(--line);padding:16px;background:#0b0e16}.research-panel.open{display:block}
+.report-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:13px}.report-title h2{font-size:17px;margin:0}.revision{color:var(--muted);font-size:11px}
+.indicators{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.indicator{border:1px solid var(--line);border-radius:999px;padding:5px 8px;font-size:11px}.indicator.success{color:var(--up)}.indicator.failure,.indicator.warning{color:#ff8b92}.indicator.money{color:#ffd166}.indicator.trend{color:#8dd8ff}
+.report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.report-section{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--glass)}.report-section.wide{grid-column:1/-1}.report-section h3{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--a);margin:0 0 9px}.facts{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:12px}.facts span:nth-child(odd){color:var(--muted)}.facts span:nth-child(even){text-align:right;font-variant-numeric:tabular-nums}.warning-list{margin:7px 0 0;padding-left:18px;color:#ffbd73;font-size:12px}
+.notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.note-field label{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}.note-field textarea{width:100%;min-height:64px;resize:vertical;background:#080a10;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;font:12px inherit}.note-actions{display:flex;align-items:center;justify-content:space-between;margin-top:10px}.save-notes{background:var(--a);color:#03111b;border:0;border-radius:8px;padding:8px 11px;font-weight:800;cursor:pointer}.note-status{color:var(--muted);font-size:11px}
+.future{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.future span{border:1px dashed #343b4d;border-radius:999px;padding:3px 7px;color:#626c82}
+.empty{border:1px dashed var(--line);border-radius:16px;padding:34px;text-align:center;color:var(--muted)}
+.error{color:#ff6b78}
+@media(max-width:720px){body{padding:12px}.games{grid-template-columns:1fr}.buys{gap:9px}.future{display:none}.report-grid,.notes-grid{grid-template-columns:1fr}.report-section.wide{grid-column:auto}.search-row{align-items:stretch;flex-direction:column}.filters label{min-width:calc(50% - 8px)}.flow-controls{padding:11px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a href="/">US Portfolio</a><a class="on" href="/game-flow">Game Flow</a></nav>
+  <h1>GAME FLOW <span class="control-label">NFL Game Flow and MLB activity</span></h1>
+  <section class="flow-controls" aria-label="Game Flow navigation">
+    <div class="search-row"><label class="search-field"><span class="control-label">Search games</span><input id="game-search" type="search" placeholder="Search team or matchup..." autocomplete="off"></label><button class="clear-button" id="clear-search" aria-label="Clear game search">Clear</button></div>
+    <div class="quick-views" aria-label="Quick views">
+      <button class="quick-button" data-quick="today">Today</button><button class="quick-button" data-quick="preseason">NFL Preseason</button><button class="quick-button" data-quick="live">Live</button><button class="quick-button" data-quick="finals">Finals</button><button class="quick-button" data-quick="all">All Games</button>
+    </div>
+    <div class="filters">
+      <label><span class="control-label">Sport</span><select id="filter-sport"><option value="all">All</option><option value="nfl">NFL</option><option value="mlb">MLB</option></select></label>
+      <label data-nfl-filter><span class="control-label">NFL season type</span><select id="filter-season"><option value="all">All</option></select></label>
+      <label data-nfl-filter><span class="control-label">Week</span><select id="filter-week"><option value="all">All</option></select></label>
+      <label><span class="control-label">Game status</span><select id="filter-status"><option value="all">All</option><option value="upcoming">Upcoming</option><option value="live">Live</option><option value="final">Final</option><option value="postponed">Postponed / Canceled</option></select></label>
+      <label><span class="control-label">Date</span><select id="filter-date"><option value="all">All</option><option value="today">Today</option><option value="upcoming">Upcoming</option><option value="completed">Completed</option></select></label>
+      <label><span class="control-label">Sort</span><select id="sort-games" aria-describedby="smart-order-help"><option value="smart">Smart order</option><option value="kickoff">Kickoff: soonest first</option><option value="kickoff-desc">Kickoff: latest first</option><option value="activity">Most recent activity</option><option value="largest-buy">Largest qualifying buy</option><option value="matchup">Matchup A–Z</option><option value="matchup-desc">Matchup Z–A</option></select></label>
+      <label class="live-toggle"><input id="live-first" type="checkbox" checked> <span>Live games first</span></label>
+    </div>
+    <div id="smart-order-help" class="control-help">Smart order: live, today’s upcoming games, future games, then newest finals. Live-first overrides non-alphabetical sorts.</div>
+    <div class="active-state" id="active-state" aria-live="polite"></div>
+  </section>
+  <div class="sub" id="flow-sub">Qualifying MLB moneyline activity, organized around each game.</div>
+  <div class="summary" id="summary"></div>
+  <main class="games" id="games"><div class="empty">Loading game activity…</div></main>
+</div>
+<script src="/game_flow.js"></script>
+<script src="/postgame_research.js"></script>
+<script src="/game_flow_ui.js"></script>
+<script>
+if (!window.GameFlowNavigationActive) {
+const usd = value => '$' + Number(value || 0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct = value => Number.isFinite(value)
+  ? (Math.abs(value-Math.round(value)) < .05 ? Math.round(value) : value.toFixed(1)) + '%'
+  : '—';
+const esc = value => String(value == null ? '' : value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+const age = timestamp => {
+  if (!timestamp) return 'unknown';
+  const seconds = Math.max(0, Math.round((Date.now() - timestamp) / 1000));
+  if (seconds < 60) return seconds + ' seconds ago';
+  if (seconds < 3600) return Math.round(seconds / 60) + ' minutes ago';
+  return Math.round(seconds / 3600) + ' hours ago';
+};
+const gameTime = timestamp => timestamp
+  ? new Date(timestamp).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
+  : 'Start time unavailable';
+function buys(game, team) {
+  const rows = game.buys[team] || [];
+  return `<section class="side"><div class="side-name">${esc(team)}</div>` +
+    (rows.length ? rows.map(row => `<div class="buy"><span class="amount">${usd(row.risk_usd)}</span><span class="price">${Math.round(row.entry_price*100)}%</span></div>`).join('')
+      : '<div class="none">No qualifying buys</div>') + '</section>';
+}
+let activeSport='mlb';
+function renderMLB(data) {
+  const games = GameFlow.groupGameFlow(data.open || [], data.minimum_display_usd);
+  const buysCount = games.reduce((sum, game) => sum + game.buys[game.away].length + game.buys[game.home].length, 0);
+  document.getElementById('flow-sub').textContent = `MLB moneyline buys with at least ${usd(data.minimum_display_usd)} risk. Latest observed probabilities use the existing trade stream.`;
+  document.getElementById('summary').innerHTML = `<div class="stat"><b>${games.length}</b><span>active games</span></div><div class="stat"><b>${buysCount}</b><span>qualifying buys shown</span></div>`;
+  document.getElementById('games').innerHTML = games.length ? games.map(game => `
+    <article class="game" data-event="${esc(game.event_slug)}">
+      <header class="game-head">
+        <div class="matchup">${esc(game.away)} @ ${esc(game.home)}</div>
+        <div class="market">${game.market} · ${gameTime(game.start_time)}</div>
+        <div class="probabilities">
+          <div class="prob"><b>${esc(game.away)}</b><b>${pct(game.probabilities[game.away])}</b></div>
+          <div class="prob"><b>${esc(game.home)}</b><b>${pct(game.probabilities[game.home])}</b></div>
+        </div>
+      </header>
+      <div class="buys"><div class="buys-title">Largest buys</div>${buys(game,game.away)}${buys(game,game.home)}</div>
+      <footer class="game-foot">
+        <span>Last activity: ${age(game.last_activity)}</span>
+        <span class="future"><span>Observations</span><span>Paper Position</span><span>Settlement</span><span>History</span></span>
+      </footer>
+    </article>`).join('') : '<div class="empty">No MLB games have qualifying moneyline activity yet.</div>';
+}
+const cents=value=>value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))?Math.round(Number(value)*100)+'¢':'—';
+function nflBuys(game,teamId,teamName){const rows=(game.buys&&game.buys[teamId])||[];return `<section class="side"><div class="side-name">${esc(teamName)}</div>`+(rows.length?rows.map(row=>`<div class="buy"><span class="amount">${usd(row.amount_usd)}</span><span class="price">@ ${cents(row.execution_price)}</span></div>`).join(''):'<div class="none">No qualifying buys</div>')+'</section>'}
+function renderNFL(data){const games=data.games||[];const withActivity=games.filter(g=>g.last_activity).length;document.getElementById('flow-sub').textContent='Canonical 2026 NFL Hall of Fame and preseason moneyline research. Winners come only from authoritative final results.';document.getElementById('summary').innerHTML=`<div class="stat"><b>${games.length}</b><span>canonical games</span></div><div class="stat"><b>${withActivity}</b><span>games with activity</span></div>`;document.getElementById('games').innerHTML=games.length?games.map(game=>{const outcomes=(game.moneyline||[]).map(o=>`<div class="prob"><b>${esc(o.team)}</b><b>${cents(o.price)}</b></div>`).join('');const winner=game.winner_team_id?`<span>Winner: ${esc(game.winner_team_id)}</span>`:'';return `<article class="game" data-game-uuid="${esc(game.game_uuid)}"><header class="game-head"><div class="matchup">${esc(game.away)} @ ${esc(game.home)}</div><div class="market">${esc(game.season_type)} ${esc(game.week)} Â· ${gameTime(game.kickoff)} Â· ${esc(game.status)}</div><div class="probabilities">${outcomes||'<div class="none">Moneyline unavailable</div>'}</div></header><div class="buys"><div class="buys-title">Largest qualifying buys</div>${nflBuys(game,game.away_team_id,game.away)}${nflBuys(game,game.home_team_id,game.home)}</div><footer class="game-foot"><span>Last activity: ${game.last_activity?age(Date.parse(game.last_activity)):'none'}</span>${winner}</footer></article>`}).join(''):'<div class="empty">No canonical NFL games are available.</div>'}
+async function load() {
+  try {
+    const endpoint=activeSport==='nfl'?'/api/nfl-game-flow':'/api/big-money';
+    const response = await fetch(endpoint+'?t=' + Date.now());
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data=await response.json(); activeSport==='nfl'?PostGameResearch.render(data,{esc,usd,cents,age,gameTime}):renderMLB(data);
+  } catch (error) {
+    document.getElementById('games').innerHTML = `<div class="empty error">Game Flow is temporarily unavailable (${esc(error.message)}).</div>`;
+  }
+}
+document.querySelectorAll('[data-sport]').forEach(button=>button.addEventListener('click',()=>{activeSport=button.dataset.sport;document.querySelectorAll('[data-sport]').forEach(item=>item.classList.toggle('on',item===button));load()}));
+load();
+setInterval(load,30000);
+}
+</script>
+</body>
+</html>

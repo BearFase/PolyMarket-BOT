@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Runtime databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Runtime logs and state
+monitor_log.txt
+monitor_state.json
+price_history.json
+sports_edges.json
+nfl_*_live_smoke*.json
+nfl_daily_update.lock
+nfl_maintenance.json
+nfl_workflow_state.json
+nfl_workflow_*.json
+real_positions.json
+whale_data.json
+system_status.json
+paper_state.json
+paper_positions.json
+paper_positions.json.bak.*
+paper_state.json.bak.*
+
+# Other generated runtime output
+dashboard_data.js
+position_audit.log
+dashboard_server.log
+srv8765_*.log
+stream_*.log
+logs/
+*.log
+.runtime/
+
+# Environment
+.env
+.venv/
+.env.local
+.env.*.local
+*.key
+*.pem
+*.secret
+# But DO track the template:
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

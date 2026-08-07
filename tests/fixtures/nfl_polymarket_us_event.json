@@ -1,0 +1,25 @@
+{
+  "events": [{
+    "id": "pm-event-pit-bal",
+    "slug": "nfl-pit-bal-2026-08-14",
+    "title": "Pittsburgh Steelers vs. Baltimore Ravens",
+    "startTime": "2026-08-14T23:30:00Z",
+    "markets": [{
+      "id": "pm-market-pit-bal-ml",
+      "slug": "nfl-pit-bal-2026-08-14-moneyline",
+      "conditionId": "condition-pit-bal",
+      "marketType": "moneyline",
+      "question": "Who will win Pittsburgh Steelers vs Baltimore Ravens?",
+      "marketSides": [
+        {"id": "token-pit", "description": "Pittsburgh Steelers", "long": true},
+        {"id": "token-bal", "description": "Baltimore Ravens", "long": false}
+      ],
+      "acceptingOrders": true,
+      "active": true,
+      "closed": false,
+      "bestBid": 0.48,
+      "bestAsk": 0.51,
+      "lastTradePrice": 0.5
+    }]
+  }]
+}

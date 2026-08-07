@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDGE · Polymarket Bot</title>
+<style>
+  :root {
+    --bg:        #06070d;
+    --glow-1:    rgba(56,189,248,0.13);
+    --glow-2:    rgba(0,230,138,0.09);
+    --glass:     rgba(255,255,255,0.035);
+    --glass-hi:  rgba(255,255,255,0.07);
+    --stroke:    rgba(255,255,255,0.09);
+    --ink:       #f2f5ff;
+    --ink-2:     #9aa3b8;
+    --muted:     #5c6579;
+    --accent:    #38bdf8;
+    --up:        #00e68a;
+    --down:      #ff4d5e;
+    --warn:      #fbbf24;
+    --track:     rgba(255,255,255,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 20px 60px;
+    background:
+      radial-gradient(900px 480px at 12% -8%, var(--glow-1), transparent 62%),
+      radial-gradient(760px 420px at 88% 4%, var(--glow-2), transparent 60%),
+      var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 2px 30px; gap: 12px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .mark {
+    width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+    background: linear-gradient(135deg, #38bdf8, #00e68a);
+    color: #04121c; font-weight: 900; font-size: 17px; letter-spacing: -1px;
+  }
+  .brand h1 { font-size: 1rem; font-weight: 800; letter-spacing: 0.14em; }
+  .brand h1 span { color: var(--muted); font-weight: 500; letter-spacing: 0.06em; }
+  .sync { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--ink-2);
+          background: var(--glass); border: 1px solid var(--stroke); border-radius: 999px; padding: 7px 14px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--up); animation: pulse 2s infinite; }
+  .dot.stale { background: var(--warn); animation: none; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,230,138,.5); } 55% { box-shadow: 0 0 0 7px rgba(0,230,138,0); } }
+
+  /* ---------- hero ---------- */
+  .hero { text-align: center; margin: 6px 0 40px; }
+  .hero .label { font-size: 0.76rem; letter-spacing: 0.28em; color: var(--muted); text-transform: uppercase; }
+  .hero .value {
+    font-size: clamp(64px, 11vw, 110px); font-weight: 850; letter-spacing: -0.04em; line-height: 1.04;
+    background: linear-gradient(120deg, #00e68a 15%, #7ef7c5 50%, #38bdf8 90%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 26px rgba(0,230,138,0.24));
+  }
+  .hero .value.neg {
+    background: linear-gradient(120deg, #ff4d5e 15%, #ff9aa4 55%, #fbbf24 95%);
+    -webkit-background-clip: text; background-clip: text;
+    filter: drop-shadow(0 0 26px rgba(255,77,94,0.24));
+  }
+  .hero .sub { color: var(--ink-2); font-size: 0.92rem; margin-top: 8px; }
+  .hero .sub b { color: var(--ink); font-weight: 650; }
+
+  /* ---------- tiles ---------- */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .tile {
+    background: var(--glass); border: 1px solid var(--stroke); border-radius: 16px;
+    padding: 16px 18px; backdrop-filter: blur(8px);
+    transition: transform .18s ease, border-color .18s ease;
+  }
+  .tile:hover { transform: translateY(-2px); border-color: var(--glass-hi); }
+  .tile .k { font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .tile .v { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; }
+  .tile .n { font-size: 0.76rem; color: var(--ink-2); margin-top: 3px; }
+  .up-t   { color: var(--up); }
+  .down-t { color: var(--down); }
+
+  /* ---------- cards ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 14px; align-items: start; }
+  .card {
+    background: var(--glass); border: 1px solid var(--stroke); border-radius: 18px;
+    padding: 22px; backdrop-filter: blur(8px); animation: rise .5s ease both;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  .card.span { grid-column: 1 / -1; }
+  .card h2 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+             font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-2);
+             margin-bottom: 16px; }
+  .card h2 .when { font-weight: 500; letter-spacing: 0.03em; text-transform: none; color: var(--muted); font-size: 0.74rem; }
+
+  /* ---------- matchup / position ---------- */
+  .pos { padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--stroke); }
+  .pos:first-of-type { padding-top: 0; margin-top: 0; border-top: 0; }
+  .matchhead { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .matchhead .title { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em; }
+  .pill {
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+    border-radius: 999px; padding: 5px 12px; white-space: nowrap;
+  }
+  .pill.live { background: rgba(251,191,36,0.14); color: var(--warn); border: 1px solid rgba(251,191,36,0.35); }
+  .betline { margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .team-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-weight: 750; font-size: 0.9rem; border-radius: 999px; padding: 6px 14px;
+    background: var(--glass-hi); border: 1px solid var(--stroke);
+  }
+  .team-chip i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .pnl-big { font-size: 2rem; font-weight: 850; letter-spacing: -0.02em; }
+
+  .oddsbar { margin: 18px 0 6px; }
+  .oddsbar .names { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--ink-2); margin-bottom: 7px; }
+  .oddsbar .names b { color: var(--ink); }
+  .oddsbar .bar { height: 14px; border-radius: 7px; overflow: hidden; display: flex; background: var(--track); }
+  .oddsbar .bar i { height: 100%; transition: width .9s cubic-bezier(.2,.8,.2,1); }
+
+  /* ---------- price sparkline ---------- */
+  .spark-wrap { margin: 18px 0 4px; }
+  .spark-wrap .k { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .spark { width: 100%; height: auto; display: block; }
+  .spark .gl { stroke: var(--stroke); stroke-width: 1; }
+  .spark .glab, .spark .tlab { fill: var(--muted); font-size: 10px; font-family: inherit; }
+  .spark .plab { fill: var(--ink); font-size: 11.5px; font-weight: 700; font-family: inherit; font-variant-numeric: tabular-nums; }
+  .spark-note {
+    color: var(--muted); font-size: 0.8rem; font-style: italic;
+    border: 1px dashed var(--stroke); border-radius: 12px;
+    padding: 18px 16px; text-align: center;
+  }
+
+  .facts { display: flex; gap: 26px; flex-wrap: wrap; margin: 16px 0 2px; }
+  .fact .k { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .fact .v { font-size: 1rem; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+  .scn { display: grid; grid-template-columns: 1fr minmax(90px, 220px) 92px; gap: 14px; align-items: center; padding: 7px 0; }
+  .scn .name { font-size: 0.92rem; color: var(--ink-2); }
+  .scn .bar { height: 10px; border-radius: 5px; background: var(--track); overflow: hidden; }
+  .scn .bar i { display: block; height: 100%; border-radius: 5px; width: 0; transition: width .9s cubic-bezier(.2,.8,.2,1); }
+  .scn .bar i.w { background: linear-gradient(90deg, #00b86e, var(--up)); box-shadow: 0 0 12px rgba(0,230,138,.35); }
+  .scn .bar i.l { background: linear-gradient(90deg, #c2303e, var(--down)); box-shadow: 0 0 12px rgba(255,77,94,.3); }
+  .scn .amt { font-size: 0.98rem; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ---------- rows ---------- */
+  .row { border-top: 1px solid var(--stroke); padding: 13px 0; }
+  .row:first-of-type { border-top: 0; padding-top: 0; }
+  .row .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .row .name { font-size: 0.94rem; font-weight: 650; }
+  .row .meta { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .badge { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+           border-radius: 999px; padding: 4px 11px; white-space: nowrap; }
+  .badge.new   { background: rgba(56,189,248,0.14); color: var(--accent); border: 1px solid rgba(56,189,248,0.35); }
+  .badge.acted { background: var(--glass-hi); color: var(--ink-2); border: 1px solid var(--stroke); }
+  .edge-num { font-size: 1.25rem; font-weight: 850; color: var(--up); }
+  .kv { font-size: 0.94rem; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .empty { color: var(--muted); font-size: 0.86rem; }
+  .alert { color: var(--down); font-size: 0.95rem; line-height: 1.5; }
+  .status-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:9px; }
+  .status-item { border:1px solid var(--stroke); border-radius:12px; padding:11px 12px; background:var(--glass); }
+  .status-item .name { font-size:.78rem; color:var(--ink-2); }
+  .status-item .state { margin-top:5px; font-size:.88rem; font-weight:800; text-transform:uppercase; }
+  .status-item.healthy .state { color:var(--up); }
+  .status-item.stale { border-color:rgba(245,158,11,.42); }
+  .status-item.stale .state { color:#f59e0b; }
+  .status-item.disconnected, .status-item.error { border-color:rgba(255,77,94,.46); }
+  .status-item.disconnected .state, .status-item.error .state { color:var(--down); }
+  .status-error { margin-top:12px; color:var(--muted); font-size:.78rem; }
+
+  footer { text-align: center; color: var(--muted); font-size: 0.74rem; margin-top: 34px; }
+  .u { color: var(--up); } .d { color: var(--down); }
+</style>
+</head>
+<body>
+  <nav style="max-width:1200px;margin:16px auto 0;padding:0 18px;display:flex;gap:8px">
+    <a href="/" style="padding:8px 14px;border-radius:999px;background:#38bdf8;color:#04121c;text-decoration:none;font-weight:800">US Portfolio</a>
+    <a href="/game-flow" style="padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:inherit;text-decoration:none;font-weight:700">Game Flow</a>
+  </nav>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">Λ</div>
+      <h1>EDGE <span>/ polymarket bot</span></h1>
+    </div>
+    <div class="sync"><span class="dot" id="dot"></span><span id="sync-text">loading…</span></div>
+  </header>
+
+  <div class="hero">
+    <div class="label">Total profit &amp; loss</div>
+    <div class="value" id="hero">$0.00</div>
+    <div class="sub" id="hero-sub"></div>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="grid">
+    <div class="card span">
+      <h2>System status <span class="when" id="status-when"></span></h2>
+      <div id="system-status"><p class="empty">Loading...</p></div>
+    </div>
+
+    <div class="card span">
+      <h2>Open positions <span class="when" id="pos-when"></span></h2>
+      <div id="positions"><p class="empty">Loading…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Edge scanner <span class="when" id="edges-when"></span></h2>
+      <div id="edges"><p class="empty">Loading…</p></div>
+    </div>
+
+    <div class="card span">
+      <h2>Closed trades</h2>
+      <div id="closed"><p class="empty">Loading…</p></div>
+    </div>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script src="dashboard_data.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const usd = n => (n > 0 ? '+' : n < 0 ? '−' : '') + '$' + Math.abs(n).toFixed(2);
+const cls = n => n > 0 ? 'u' : n < 0 ? 'd' : '';
+const esc = value => String(value == null ? '' : value)
+  .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+
+function ago(iso) {
+  if (!iso) return '';
+  const m = Math.max(0, (Date.now() - new Date(iso)) / 60000);
+  if (m < 1.5) return 'just now';
+  if (m < 90) return Math.round(m) + ' min ago';
+  if (m < 2160) return Math.round(m / 60) + ' h ago';
+  return Math.round(m / 1440) + ' d ago';
+}
+
+function countUp(el, target) {
+  // animate from the last shown value, not from 0 - and skip the animation
+  // entirely in a hidden tab (throttled frames would freeze it mid-count)
+  const from = parseFloat(el.dataset.v || '0') || 0;
+  el.dataset.v = target;
+  if (document.hidden || from === target) { el.textContent = usd(target); return; }
+  const t0 = performance.now(), dur = 900;
+  function tick(t) {
+    const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = usd(from + (target - from) * e);
+    if (p < 1) requestAnimationFrame(tick); else el.textContent = usd(target);
+  }
+  requestAnimationFrame(tick);
+}
+document.addEventListener('visibilitychange', () => {
+  // coming back to the tab: stamp the true value immediately
+  if (!document.hidden) {
+    const el = $('hero');
+    if (el && el.dataset.v) el.textContent = usd(parseFloat(el.dataset.v));
+  }
+});
+
+function matchDayPill(slug) {
+  const m = (slug || '').match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return '';
+  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = Math.round((d - today) / 864e5);
+  const label = days === 0 ? 'match day: today' : days === 1 ? 'match day: tomorrow'
+              : days > 1 ? `match day in ${days}d`
+              : 'awaiting result';
+  return `<span class="pill live">⚡ ${label}</span>`;
+}
+
+function sparkline(points, color) {
+  // Inline SVG price line (no libraries — must work from file://).
+  const pts = (points || []).filter(pt => pt && pt.t && typeof pt.price === 'number');
+  if (pts.length < 2) return '<div class="spark-note">collecting price history… a new point lands with every sync</div>';
+
+  const W = 600, H = 150, padL = 34, padR = 56, padT = 14, padB = 22;
+  const ts = pts.map(pt => new Date(pt.t).getTime());
+  const ps = pts.map(pt => pt.price * 100);
+  let lo = Math.min(...ps), hi = Math.max(...ps);
+  const span = Math.max(hi - lo, 2);            // never zoom tighter than 2pts
+  const mid = (hi + lo) / 2;
+  lo = Math.max(0, mid - span * 0.65);
+  hi = Math.min(100, mid + span * 0.65);
+  const t0 = ts[0], t1 = ts[ts.length - 1];
+  const x = t => padL + (t - t0) / Math.max(1, t1 - t0) * (W - padL - padR);
+  const y = v => padT + (hi - v) / (hi - lo) * (H - padT - padB);
+
+  const path = ts.map((t, i) => `${x(t).toFixed(1)},${y(ps[i]).toFixed(1)}`);
+  const line = 'M' + path.join(' L');
+  const area = line + ` L${x(t1).toFixed(1)},${H - padB} L${padL},${H - padB} Z`;
+
+  const grid = [0.22, 0.5, 0.78].map(f => {
+    const v = lo + (hi - lo) * f, yy = y(v).toFixed(1);
+    return `<line class="gl" x1="${padL}" x2="${W - padR}" y1="${yy}" y2="${yy}"/>` +
+           `<text class="glab" x="${padL - 6}" y="${+yy + 3}" text-anchor="end">${v.toFixed(0)}%</text>`;
+  }).join('');
+
+  const fmtT = t => {
+    const d = new Date(t);
+    const hm = d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    return (t1 - t0 > 86400e3) ? `${d.getMonth() + 1}/${d.getDate()} ${hm}` : hm;
+  };
+  const last = ps[ps.length - 1], lx = x(t1), ly = y(last);
+  const labelY = Math.min(Math.max(ly + 4, padT + 10), H - padB - 4);
+
+  return `
+  <svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Price history, now ${last.toFixed(1)}%">
+    ${grid}
+    <path d="${area}" fill="${color}" fill-opacity="0.10"/>
+    <path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3.5" fill="${color}"/>
+    <text class="plab" x="${(lx + 8).toFixed(1)}" y="${labelY.toFixed(1)}">${last.toFixed(1)}%</text>
+    <text class="tlab" x="${padL}" y="${H - 6}">${fmtT(t0)}</text>
+    <text class="tlab" x="${W - padR}" y="${H - 6}" text-anchor="end">${fmtT(t1)}</text>
+  </svg>`;
+}
+
+function render(data, source) {
+  const real = data.real || {}, signals = data.edges || {}, status = data.status || {};
+  const positions = real.positions || [], closed = real.closed || [];
+
+  const syncAge = ago(real.last_sync);
+  $('sync-text').textContent = (source === 'live' ? 'live · synced ' : 'snapshot · synced ') + (syncAge || 'never');
+  const stale = !real.last_sync || (Date.now() - new Date(real.last_sync)) > 3600e3;
+  $('dot').className = 'dot' + (stale ? ' stale' : '');
+
+  const total = real.total_pnl || 0;
+  $('hero').className = 'value' + (total < 0 ? ' neg' : '');
+  countUp($('hero'), total);
+  const openPnl = positions.reduce((s, p) => s + (p.pnl || 0), 0);
+  const realizedPnl = real.realized_pnl != null
+    ? real.realized_pnl : closed.reduce((s, p) => s + (p.pnl || 0), 0);
+  $('hero-sub').innerHTML = `<b>${usd(realizedPnl)}</b> realized &nbsp;·&nbsp; <b>${usd(openPnl)}</b> riding`;
+
+  const exposure = positions.reduce((s, p) => s + (p.cost_basis || 0), 0);
+  const wins = closed.filter(p => (p.pnl || 0) > 0).length;
+  const worst = positions.reduce((s, p) => s + Math.min(0, ...(p.scenarios || []).map(x => x.pnl)), 0);
+  const best = positions.reduce((s, p) => s + Math.max(0, ...(p.scenarios || []).map(x => x.pnl)), 0);
+  const acct = real.account || {};
+  $('tiles').innerHTML = [
+    ['Portfolio', acct.equity != null ? '$' + acct.equity.toFixed(2) : '—',
+     acct.equity != null ? '$' + acct.cash.toFixed(2) + ' cash + $' + acct.position_value.toFixed(2) + ' positions' : 'not synced yet', ''],
+    ['Cash', acct.cash != null ? '$' + acct.cash.toFixed(2) : '—',
+     'exchange buying power', ''],
+    ['In play', '$' + exposure.toFixed(0), positions.length + ' open position' + (positions.length === 1 ? '' : 's'), ''],
+    ['Best case', usd(best), 'every open bet hits', 'up-t'],
+    ['Worst case', usd(worst), 'every open bet misses', 'down-t'],
+    ['Tracked record', wins + '–' + (closed.length - wins), 'local closed-trade audit', ''],
+  ].map(([k, v, n, c]) =>
+    `<div class="tile"><div class="k">${k}</div><div class="v ${c}">${v}</div><div class="n">${n}</div></div>`).join('');
+
+  // positions
+  if (!positions.length) {
+    $('positions').innerHTML = '<p class="empty">No open positions — the edge scanner is watching.</p>';
+    $('pos-when').textContent = '';
+  } else {
+    $('pos-when').textContent = 'updated ' + ago(positions[0].last_updated || real.last_sync);
+    const maxAbs = Math.max(1, ...positions.flatMap(p => (p.scenarios || []).map(s => Math.abs(s.pnl))));
+    $('positions').innerHTML = positions.map(p => {
+      const yourPct = (p.current_price || 0) * 100;
+      const teams = (p.market || '').split(/\s+vs\.?\s+/i);
+      const opp = teams.find(t => t.toLowerCase() !== (p.outcome || '').toLowerCase()) || 'Opponent';
+      const color = p.team_color || 'var(--accent)';
+      return `
+      <div class="pos">
+        <div class="matchhead">
+          <div class="title">${p.market}</div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            ${matchDayPill(p.event_slug)}
+            <div class="pnl-big ${cls(p.pnl)}">${usd(p.pnl)}</div>
+          </div>
+        </div>
+        <div class="betline">
+          <span class="team-chip"><i style="background:${color}"></i>${p.bet_type || ('Backing ' + p.outcome)}</span>
+        </div>
+        <div class="oddsbar">
+          <div class="names"><b>${p.outcome} ${yourPct.toFixed(1)}%</b><span>${opp} ${(100 - yourPct).toFixed(1)}%</span></div>
+          <div class="bar">
+            <i style="background:${color}; width:0" data-w="${yourPct}"></i>
+            <i style="background:var(--glass-hi); width:0" data-w="${100 - yourPct}"></i>
+          </div>
+        </div>
+        <div class="facts">
+          <div class="fact"><div class="k">Stake</div><div class="v">$${p.cost_basis.toFixed(2)}</div></div>
+          <div class="fact"><div class="k">Now worth</div><div class="v">$${p.current_value.toFixed(2)}</div></div>
+          <div class="fact"><div class="k">Entry</div><div class="v">${(p.entry_price * 100).toFixed(1)}¢</div></div>
+          <div class="fact"><div class="k">Now</div><div class="v">${(p.current_price * 100).toFixed(1)}¢</div></div>
+          <div class="fact"><div class="k">Contracts</div><div class="v">${p.contracts.toFixed(1)}</div></div>
+        </div>
+        <div style="margin-top:14px;">
+          ${(p.scenarios || []).map(s => `
+            <div class="scn">
+              <div class="name">If <b style="color:var(--ink)">${s.scenario}</b></div>
+              <div class="bar"><i class="${s.pnl >= 0 ? 'w' : 'l'}" data-w="${Math.abs(s.pnl) / maxAbs * 100}"></i></div>
+              <div class="amt ${cls(s.pnl)}">${usd(s.pnl)}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+    requestAnimationFrame(() =>
+      document.querySelectorAll('.bar i[data-w]').forEach(el => el.style.width = el.dataset.w + '%'));
+  }
+
+  // edges
+  const edges = signals.edges || [];
+  $('edges-when').textContent = signals.last_updated ? 'scanned ' + ago(signals.last_updated) : '';
+  $('edges').innerHTML = !edges.length
+    ? '<p class="empty">No mispricing found in the last scan.</p>'
+    : edges.map(e => {
+        const inPos = positions.find(p => (p.outcome || '').toLowerCase() === (e.team || '').toLowerCase());
+        const badge = inPos
+          ? `<span class="badge acted">in position · $${inPos.cost_basis.toFixed(0)}</span>`
+          : `<span class="badge new">new · ${e.direction || ''} ${e.team || ''}</span>`;
+        return `
+        <div class="row">
+          <div class="top"><span class="edge-num">${e.edge_pct > 0 ? '+' : ''}${e.edge_pct.toFixed(1)}%</span>${badge}</div>
+          <div class="name" style="margin-top:6px;">${e.market}</div>
+          <div class="meta">Polymarket US ${e.polymarket_prob}% vs books ${e.consensus_prob}%${e.canonical_game_id ? ` · ${e.canonical_game_id}` : ''}</div>
+        </div>`;
+      }).join('');
+
+  // operational status (sanitized by /api/system-status)
+  const services = status.services || {};
+  const serviceNames = {
+    trade_stream: 'Live trade stream',
+    last_trade: 'Last trade received',
+    position_sync: 'Position sync',
+    market_discovery: 'Market discovery',
+    edge_scan: 'Edge scan',
+  };
+  $('status-when').textContent = status.generated_at ? 'checked ' + ago(status.generated_at) : '';
+  $('system-status').innerHTML = '<div class="status-grid">' +
+    Object.keys(serviceNames).map(key => {
+      const item = services[key] || {state:'stale'};
+      const detail = item.timestamp ? ago(item.timestamp) : (item.detail || 'never');
+      return `<div class="status-item ${item.state}">
+        <div class="name">${serviceNames[key]}</div>
+        <div class="state">${item.state}</div>
+        <div class="meta">${esc(detail)}</div>
+      </div>`;
+    }).join('') + '</div>';
+  if (status.last_error) {
+    $('system-status').innerHTML += `<div class="status-error">
+      Latest issue (${esc(status.last_error.component || 'system')}, ${ago(status.last_error.at) || 'unknown time'}):
+      ${esc(status.last_error.message || 'No details available')}
+    </div>`;
+  }
+
+  // closed
+  $('closed').innerHTML = !closed.length
+    ? '<p class="empty">Nothing closed yet.</p>'
+    : closed.slice().reverse().map(p => `
+      <div class="row">
+        <div class="top"><div class="name">${p.market}</div><div class="kv ${cls(p.pnl)}">${usd(p.pnl)}</div></div>
+        <div class="meta">${p.outcome || ''}${p.result ? ' · ' + p.result : ''}</div>
+      </div>`).join('');
+
+  $('foot').textContent = (source === 'live' ? 'Live · auto-refresh 30s' : 'Snapshot from last sync — open via Open Dashboard.cmd for live updates')
+    + ' · rendered ' + new Date().toLocaleTimeString();
+}
+
+function loadLive() {
+  return Promise.all([
+    fetch('real_positions.json?t=' + Date.now()).then(r => r.json()),
+    fetch('sports_edges.json?t=' + Date.now()).then(r => r.json()).catch(() => ({})),
+    fetch('/api/system-status?t=' + Date.now()).then(r => r.json()).catch(() => ({})),
+  ]).then(([real, edges, status]) => render({real, edges, status}, 'live'));
+}
+
+// Embedded snapshot renders instantly (works from file:// too); live fetch upgrades it.
+if (window.BOT_DATA) render(window.BOT_DATA, 'snapshot');
+
+if (location.protocol.startsWith('http')) {
+  loadLive().catch(e => {
+    if (!window.BOT_DATA) {
+      $('positions').innerHTML = `<p class="alert">Couldn't load data (${e.message}). Reopen with <b>Open Dashboard.cmd</b>; the startup manager will verify the server.</p>`;
+      $('sync-text').textContent = 'load error';
+      $('dot').className = 'dot stale';
+    }
+  });
+  setInterval(() => loadLive().catch(() => {}), 30000);
+} else if (!window.BOT_DATA) {
+  $('positions').innerHTML = '<p class="alert">No data bundle found. Reopen with <b>Open Dashboard.cmd</b> to run the verified startup path.</p>';
+  $('sync-text').textContent = 'no data';
+  $('dot').className = 'dot stale';
+}
+</script>
+</body>
+</html>

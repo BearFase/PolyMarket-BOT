@@ -1,0 +1,16 @@
+{
+  "events": [{
+    "id": "401900002",
+    "name": "Pittsburgh Steelers at Baltimore Ravens",
+    "date": "2026-08-14T23:30:00Z",
+    "status": {"type": {"name": "STATUS_FINAL", "state": "post", "completed": true}},
+    "competitions": [{
+      "neutralSite": false,
+      "venue": {"fullName": "M&T Bank Stadium"},
+      "competitors": [
+        {"homeAway": "home", "score": "17", "team": {"displayName": "Baltimore Ravens"}},
+        {"homeAway": "away", "score": "24", "team": {"displayName": "Pittsburgh Steelers"}}
+      ]
+    }]
+  }]
+}

@@ -1,0 +1,32 @@
+{
+  "events": [
+    {
+      "id": "401900001",
+      "name": "Dallas Cowboys at Los Angeles Chargers - Hall of Fame Game",
+      "date": "2026-08-07T00:00:00Z",
+      "status": {"type": {"name": "STATUS_SCHEDULED", "state": "pre", "completed": false}},
+      "competitions": [{
+        "neutralSite": true,
+        "venue": {"fullName": "Tom Benson Hall of Fame Stadium"},
+        "competitors": [
+          {"homeAway": "home", "team": {"displayName": "Los Angeles Chargers"}},
+          {"homeAway": "away", "team": {"displayName": "Dallas Cowboys"}}
+        ]
+      }]
+    },
+    {
+      "id": "401900002",
+      "name": "Pittsburgh Steelers at Baltimore Ravens",
+      "date": "2026-08-14T23:30:00Z",
+      "status": {"type": {"name": "STATUS_SCHEDULED", "state": "pre", "completed": false}},
+      "competitions": [{
+        "neutralSite": false,
+        "venue": {"fullName": "M&T Bank Stadium"},
+        "competitors": [
+          {"homeAway": "home", "team": {"displayName": "Baltimore Ravens"}},
+          {"homeAway": "away", "team": {"displayName": "Pittsburgh Steelers"}}
+        ]
+      }]
+    }
+  ]
+}
