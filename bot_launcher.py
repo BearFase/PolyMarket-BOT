@@ -20,6 +20,7 @@ OUT_LOG = ROOT / "dashboard_server.log"
 ERR_LOG = ROOT / "dashboard_server_error.log"
 HEALTH_URL = "http://127.0.0.1:8766/api/health"
 DASHBOARD_URL = "http://127.0.0.1:8766/"
+TASK_NAME = "Polymarket Research Dashboard"
 
 
 def health(timeout: float = 1.0) -> dict | None:
@@ -101,6 +102,56 @@ def recent_error() -> str:
         return "No error log was created."
 
 
+def ensure_windows_task() -> None:
+    """Register an on-demand dashboard task outside the launcher's process tree."""
+    python = str(Path(sys.executable).resolve()).replace("'", "''")
+    script = str((ROOT / "dashboard_server.py").resolve()).replace("'", "''")
+    working = str(ROOT.resolve()).replace("'", "''")
+    task_name = TASK_NAME.replace("'", "''")
+    powershell = rf"""
+$action = New-ScheduledTaskAction -Execute '{python}' -Argument '-u "{script}"' -WorkingDirectory '{working}'
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
+Register-ScheduledTask -TaskName '{task_name}' -Action $action -Settings $settings -User "$env:USERDOMAIN\$env:USERNAME" -RunLevel Limited -Description 'Persistent local Polymarket research dashboard' -Force | Out-Null
+"""
+    completed = subprocess.run(
+        ["powershell", "-NoProfile", "-NonInteractive", "-Command", powershell],
+        capture_output=True,
+        text=True,
+        check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    if completed.returncode:
+        message = completed.stderr.strip() or completed.stdout.strip()
+        raise RuntimeError(f"Could not register persistent dashboard task: {message}")
+
+
+def start_task(timeout: float = 30.0) -> dict:
+    """Start the persistent Windows task and wait for dashboard health."""
+    running = health()
+    if running:
+        write_pid(int(running["pid"]))
+        return running
+    ensure_windows_task()
+    completed = subprocess.run(
+        ["schtasks", "/Run", "/TN", TASK_NAME],
+        capture_output=True,
+        text=True,
+        check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    if completed.returncode:
+        message = completed.stderr.strip() or completed.stdout.strip()
+        raise RuntimeError(f"Could not start persistent dashboard task: {message}")
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        ready = health()
+        if ready:
+            write_pid(int(ready["pid"]))
+            return ready
+        time.sleep(0.25)
+    raise RuntimeError(f"Persistent dashboard task did not become healthy.\n{recent_error()}")
+
+
 def start(*, health_only: bool = False, timeout: float = 30.0) -> dict:
     running = health()
     if running:
@@ -159,13 +210,16 @@ def lifecycle_test(cycles: int) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("start", "status", "stop", "self-test"), nargs="?", default="start")
+    parser.add_argument("command", choices=("start", "task-start", "status", "stop", "self-test"), nargs="?", default="start")
     parser.add_argument("--cycles", type=int, default=100)
     args = parser.parse_args()
     try:
         if args.command == "start":
             ready = start()
             print(f"Dashboard ready (PID {ready['pid']}): {DASHBOARD_URL}")
+        elif args.command == "task-start":
+            ready = start_task()
+            print(f"Persistent dashboard ready (PID {ready['pid']}): {DASHBOARD_URL}")
         elif args.command == "status":
             ready = health()
             print(f"Dashboard healthy (PID {ready['pid']}): {DASHBOARD_URL}" if ready else "Dashboard is not running.")

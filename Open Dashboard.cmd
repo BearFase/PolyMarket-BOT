@@ -10,7 +10,7 @@ if not exist "%BOT_PYTHON%" (
   exit /b 1
 )
 echo Starting and verifying the live dashboard...
-"%BOT_PYTHON%" bot_launcher.py start
+"%BOT_PYTHON%" bot_launcher.py task-start
 if errorlevel 1 (
   echo Dashboard failed to start.
   echo Check dashboard_server_error.log and dashboard_server.log for details.
