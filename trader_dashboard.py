@@ -23,6 +23,7 @@ DASHBOARD_ASSETS = {
     "game_flow.js",
     "game_flow_ui.js",
     "postgame_research.js",
+    "mlb_research.js",
 }
 
 
@@ -47,6 +48,11 @@ def game_flow_page():
     return send_from_directory(HERE, "game_flow_dashboard.html")
 
 
+@app.route("/mlb-research")
+def mlb_research_page():
+    return send_from_directory(HERE, "mlb_research.html")
+
+
 @app.route("/api/big-money")
 def api_big_money():
     from big_money_tape import snapshot
@@ -58,6 +64,53 @@ def api_nfl_game_flow():
     from nfl_schedule import NFLRegistry, PRODUCTION_DB
     registry = NFLRegistry(PRODUCTION_DB, environment="production")
     return jsonify(registry.game_flow_snapshot())
+
+
+@app.route("/api/mlb-research")
+def api_mlb_research():
+    from mlb_research import MLBResearchRegistry, DEFAULT_DB
+    registry = MLBResearchRegistry(DEFAULT_DB)
+    filters = {key: request.args.get(key) for key in (
+        "date", "date_from", "date_to", "team", "completeness", "side", "outcome",
+        "winner", "pregame_only", "sort") if request.args.get(key) not in (None, "")}
+    for key in ("price_min", "price_max", "concentration_min", "concentration_max"):
+        if request.args.get(key) not in (None, ""):
+            try: filters[key] = float(request.args[key])
+            except ValueError: return jsonify({"error": f"{key} must be numeric"}), 400
+    try:
+        page, per_page = int(request.args.get("page", 1)), int(request.args.get("per_page", 25))
+    except ValueError:
+        return jsonify({"error": "page and per_page must be integers"}), 400
+    return jsonify(registry.research_page(filters, page, per_page))
+
+
+@app.route("/api/mlb-research/overview")
+def api_mlb_research_overview():
+    from mlb_research import MLBResearchRegistry, DEFAULT_DB
+    return jsonify(MLBResearchRegistry(DEFAULT_DB).overview(request.args.get("date")))
+
+
+@app.route("/api/mlb-research/games/<game_uuid>")
+def api_mlb_research_game(game_uuid):
+    from mlb_research import MLBResearchRegistry, DEFAULT_DB
+    game = MLBResearchRegistry(DEFAULT_DB).game_detail(game_uuid)
+    if game is None: abort(404)
+    return jsonify(game)
+
+
+@app.route("/api/mlb-research/games/<game_uuid>/timeline")
+def api_mlb_research_timeline(game_uuid):
+    from mlb_research import MLBResearchRegistry, DEFAULT_DB
+    try:
+        page, per_page = int(request.args.get("page", 1)), int(request.args.get("per_page", 100))
+        bucket = int(request.args.get("bucket_minutes", 15))
+    except ValueError:
+        return jsonify({"error": "timeline pagination values must be integers"}), 400
+    summarized = request.args.get("mode", "summary") != "detail"
+    result = MLBResearchRegistry(DEFAULT_DB).timeline(
+        game_uuid, page=page, per_page=per_page, summarized=summarized, bucket_minutes=bucket)
+    if result is None: abort(404)
+    return jsonify(result)
 
 
 @app.route("/api/nfl-games/<game_uuid>/research-summary")

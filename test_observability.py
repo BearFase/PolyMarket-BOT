@@ -70,9 +70,11 @@ class TapeThresholdTests(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.original_db = tape.DB_FILE
+        self.original_research_db = tape.MLB_RESEARCH_DB_FILE
         self.original_log = tape.LOG_FILE
         self.original_threshold = tape.MIN_DISPLAY_TRADE_USD
         tape.DB_FILE = Path(self.temp_dir.name) / "tape.db"
+        tape.MLB_RESEARCH_DB_FILE = Path(self.temp_dir.name) / "mlb-research.db"
         tape.LOG_FILE = Path(self.temp_dir.name) / "tape.log"
         tape.MIN_DISPLAY_TRADE_USD = 5
         tape.init_db()
@@ -93,6 +95,7 @@ class TapeThresholdTests(unittest.TestCase):
         with tape._market_lock:
             tape._market_map.pop(self.slug, None)
         tape.DB_FILE = self.original_db
+        tape.MLB_RESEARCH_DB_FILE = self.original_research_db
         tape.LOG_FILE = self.original_log
         tape.MIN_DISPLAY_TRADE_USD = self.original_threshold
         self.temp_dir.cleanup()

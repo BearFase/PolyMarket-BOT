@@ -16,6 +16,7 @@ dist/
 
 # Runtime databases
 *.db
+*.db.bak.*
 *.db-journal
 *.db-shm
 *.db-wal

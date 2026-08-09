@@ -61,6 +61,33 @@ undifferentiated chronological tape:
 
 <http://127.0.0.1:8766/game-flow>
 
+The MLB stream keeps its operational top-five display, while every new
+qualifying MLB moneyline execution is written first to the immutable
+`mlb_research.db` journal. Display limits are therefore no longer a research
+retention policy.
+
+## MLB Research Registry
+
+`mlb_research.py` maintains a separate canonical MLB research registry backed
+by structured MLB schedule/result identifiers. It preserves schedule revisions,
+doubleheader identity, append-only moneyline executions, source-link rejections,
+and immutable sportsbook snapshots. Existing pruned tape rows are retained as
+`LEGACY_INCOMPLETE` and excluded from authoritative research totals.
+
+```powershell
+python mlb_research.py sync-schedule
+python mlb_research.py sync-odds
+python mlb_research.py sync-all
+python mlb_research.py migrate-legacy
+python mlb_research.py summary
+python mlb_research.py status
+```
+
+The human-readable evidence page is at
+<http://127.0.0.1:8766/mlb-research>. It exposes missing evidence rather than
+inferring starts, favorites, winners, or deleted legacy trades. Descriptive
+price and concentration buckets are research summaries, not strategy rules.
+
 MLB activity continues to use `big_money_tape.py` as its stream and storage
 backend. The old “Big Money Tape” UI is retired; the backend remains active.
 NFL activity is attached only through canonical game UUIDs. Unmatched trades

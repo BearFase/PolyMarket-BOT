@@ -31,6 +31,7 @@ load_dotenv()
 
 HERE = Path(__file__).parent
 DB_FILE = HERE / "big_money_tape.db"
+MLB_RESEARCH_DB_FILE = HERE / "mlb_research.db"
 LOG_FILE = HERE / "big_money_tape.log"
 GATEWAY = "https://gateway.polymarket.us"
 WS_PATH = "/v1/ws/markets"
@@ -41,6 +42,8 @@ STANDARD_TYPES = {"moneyline", "spread", "spreads", "total", "totals"}
 TOP_PER_EVENT = 5
 DISCOVERY_EVERY = 15 * 60
 SETTLE_EVERY = 10 * 60
+MLB_RESEARCH_SYNC_EVERY = 30 * 60
+MLB_SPORTSBOOK_SYNC_EVERY = 6 * 60 * 60
 MIN_DISPLAY_TRADE_USD = float(os.getenv("BIG_MONEY_MIN_DISPLAY_USD", "5"))
 DISCOVERY_MAX_ATTEMPTS = 3
 DISCOVERY_BACKOFF_BASE = 1.0
@@ -251,6 +254,7 @@ def discover_markets():
                     "league": league, "question": market.get("question", ""),
                     "market_type": market_type, "long_label": long_label,
                     "short_label": short_label,
+                    "source_start_time": event.get("startTime") or event.get("eventDate"),
                 }
 
     with connect_db() as conn:
@@ -278,7 +282,8 @@ def discover_markets():
 def load_known_markets():
     cutoff = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
     with connect_db() as conn:
-        rows = conn.execute("""SELECT m.*, e.title event_title, e.league
+        rows = conn.execute("""SELECT m.*, e.title event_title, e.league,
+          e.start_time source_start_time
           FROM markets m JOIN events e USING(event_slug)
           WHERE m.last_seen >= ?""", (cutoff,)).fetchall()
     with _market_lock:
@@ -318,6 +323,27 @@ def record_trade(trade):
     bet_id = hashlib.sha256(raw_id.encode()).hexdigest()[:24]
     raw_selection = meta["long_label"] if is_long else meta["short_label"]
     selection = format_trade_label(meta, raw_selection)
+    if meta["league"] == "mlb" and meta["market_type"] == "moneyline" \
+            and risk >= MIN_DISPLAY_TRADE_USD:
+        try:
+            from mlb_research import MLBResearchRegistry
+            MLBResearchRegistry(MLB_RESEARCH_DB_FILE).record_trade({
+                "source_trade_key": bet_id,
+                "websocket_trade_id": trade.get("id") or trade.get("tradeId"),
+                "event_slug": meta["event_slug"], "market_slug": slug,
+                "league": "mlb", "market_type": "moneyline",
+                "event_title": meta["event_title"], "selected_team": raw_selection,
+                "raw_selection": raw_selection,
+                "selected_side": "LONG" if is_long else "SHORT",
+                "contracts": round(contracts, 4), "execution_price": round(entry_price, 6),
+                "risk_usd": round(risk, 2), "trade_timestamp_utc": trade_time,
+                "source_market_start_time": meta.get("source_start_time"),
+                "source_identifiers": {"market_slug": slug,
+                                       "event_slug": meta["event_slug"]},
+            })
+        except Exception as exc:
+            log(f"MLB research journal failed for {bet_id}: {exc}")
+            mark_error("mlb_research_journal", str(exc))
     with connect_db() as conn:
         conn.execute("""INSERT OR IGNORE INTO bets
           (id,event_slug,market_slug,league,event_title,question,selection,raw_selection,
@@ -424,6 +450,39 @@ def run():
     init_db()
     load_known_markets()
     discover_markets()
+
+    def mlb_research_sync():
+        from mlb_research import MLBResearchRegistry, fetch_schedule
+        registry = MLBResearchRegistry(MLB_RESEARCH_DB_FILE)
+        today = datetime.now(timezone.utc).date()
+        registry.ingest_schedule(fetch_schedule(today - timedelta(days=7),
+                                                today + timedelta(days=7)))
+        registry.migrate_legacy(DB_FILE)
+
+    def mlb_sportsbook_sync():
+        from mlb_research import MLBResearchRegistry, fetch_sportsbook
+        registry = MLBResearchRegistry(MLB_RESEARCH_DB_FILE)
+        registry.ingest_sportsbook(fetch_sportsbook())
+
+    def mlb_sportsbook_loop():
+        while True:
+            try:
+                mlb_sportsbook_sync()
+            except Exception as exc:
+                log(f"MLB sportsbook snapshot refresh failed: {exc}")
+            time.sleep(MLB_SPORTSBOOK_SYNC_EVERY)
+
+    def mlb_research_loop():
+        while True:
+            try:
+                mlb_research_sync()
+            except Exception as exc:
+                log(f"MLB canonical research refresh failed: {exc}")
+                mark_error("mlb_research_sync", str(exc))
+            time.sleep(MLB_RESEARCH_SYNC_EVERY)
+
+    threading.Thread(target=mlb_research_loop, daemon=True).start()
+    threading.Thread(target=mlb_sportsbook_loop, daemon=True).start()
 
     def maintenance_loop():
         while True:

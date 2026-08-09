@@ -79,6 +79,9 @@ def process_is_owned(pid: int) -> bool:
 
 
 def stop_owned() -> bool:
+    subprocess.run(
+        ["schtasks", "/End", "/TN", TASK_NAME], capture_output=True,
+        check=False, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     pid = read_pid()
     if pid and process_exists(pid) and process_is_owned(pid):
         subprocess.run(
