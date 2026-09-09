@@ -80,10 +80,35 @@ def process_is_owned(pid: int) -> bool:
             and str(ROOT).casefold() in command)
 
 
+def task_is_running() -> bool:
+    """Whether Task Scheduler still reports the dashboard task as running."""
+    result = subprocess.run(
+        ["schtasks", "/Query", "/TN", TASK_NAME, "/FO", "CSV", "/NH"],
+        capture_output=True, text=True, check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    return "running" in result.stdout.casefold()
+
+
+def await_task_stopped(timeout: float = 15.0) -> bool:
+    """Block until Task Scheduler stops reporting the task as running.
+
+    `schtasks /End` returns before the task has actually stopped. Without this
+    wait, a `stop` immediately followed by a `task-start` races: the new
+    instance starts, the lagging /End then terminates it, and the task is left
+    Ready with LastTaskResult 0x41306 (SCHED_S_TASK_TERMINATED) while the
+    launcher has already reported the dashboard as ready.
+    """
+    deadline = time.monotonic() + timeout
+    while task_is_running() and time.monotonic() < deadline:
+        time.sleep(0.25)
+    return not task_is_running()
+
+
 def stop_owned() -> bool:
     subprocess.run(
         ["schtasks", "/End", "/TN", TASK_NAME], capture_output=True,
         check=False, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    await_task_stopped()
     pid = read_pid()
     if pid and process_exists(pid) and process_is_owned(pid):
         subprocess.run(
