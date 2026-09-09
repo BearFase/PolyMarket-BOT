@@ -71,3 +71,9 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Quarantined research areas (research/) — track notes and probes only
+research/**/.venv/
+research/**/nflverse_cache/
+research/**/*.parquet
+research/**/*.csv.gz
