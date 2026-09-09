@@ -89,7 +89,7 @@ def calculate_edges(registry: NFLRegistry, *, now: datetime | None = None) -> di
     for row in rows:
         paired.setdefault(row["game_uuid"], row)
 
-    edges, skipped = [], {"stale": 0, "incomplete_prices": 0}
+    edges, skipped = [], {"stale": 0, "incomplete_prices": 0, "incoherent_prices": 0}
     for row in paired.values():
         if not (_fresh(row["odds_observed"], now, max_age)
                 and _fresh(row["polymarket_observed"], now, max_age)):
@@ -105,6 +105,18 @@ def calculate_edges(registry: NFLRegistry, *, now: datetime | None = None) -> di
         if (any(not isinstance(book_probs[t], (int, float)) for t in book_probs)
                 or set(market_prices) != set(book_probs)):
             skipped["incomplete_prices"] += 1
+            continue
+        # Both side prices must form a coherent probability pair before either
+        # can be compared with a vig-free book consensus. Polymarket US stamps
+        # a single market-level number on both marketSides of a market that has
+        # not opened for trading, so the two "prices" arrive nearly identical
+        # and sum to anything but one. Treated as probabilities those produce
+        # enormous fictional edges: every 2026 REG market observed on
+        # 2026-09-08 was of this form, with no bestBid, bestAsk or last trade,
+        # and yielded 25 "edges" between 40 and 69 percentage points.
+        pair_total = sum(market_prices.values())
+        if not 0.97 <= pair_total <= 1.03:
+            skipped["incoherent_prices"] += 1
             continue
         team_names = {
             row["away_team_id"]: row["away_team_name"],
