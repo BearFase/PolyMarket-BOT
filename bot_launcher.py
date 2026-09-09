@@ -75,7 +75,9 @@ def process_is_owned(pid: int) -> bool:
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
     command = result.stdout.casefold()
-    return "dashboard_server.py" in command and str(ROOT).casefold() in command
+    entry_points = ("dashboard_server.py", "dashboard_service.py")
+    return (any(name in command for name in entry_points)
+            and str(ROOT).casefold() in command)
 
 
 def stop_owned() -> bool:
@@ -106,15 +108,34 @@ def recent_error() -> str:
 
 
 def ensure_windows_task() -> None:
-    """Register an on-demand dashboard task outside the launcher's process tree."""
-    python = str(Path(sys.executable).resolve()).replace("'", "''")
-    script = str((ROOT / "dashboard_server.py").resolve()).replace("'", "''")
+    """Register the dashboard task outside the launcher's process tree.
+
+    Runs `pythonw.exe dashboard_service.py`, not `python.exe
+    dashboard_server.py`. `python.exe` is a console binary, so the server used
+    to receive the console control events of whatever session it was started
+    from and die with 0xC000013A (STATUS_CONTROL_C_EXIT) whenever an unrelated
+    console closed. `pythonw.exe` never allocates a console, so no such event
+    can reach it; `dashboard_service.py` restores the log redirection that a
+    console-less process would otherwise lose.
+
+    Two triggers are registered alongside the on-demand action. A logon
+    trigger brings the dashboard back after a reboot. A trigger repeating
+    every 15 minutes acts as a watchdog: `MultipleInstances IgnoreNew` makes
+    it a no-op while the server is healthy, but restarts it if it ever died,
+    including after the three `RestartCount` attempts are exhausted.
+    """
+    interpreter = Path(sys.executable).resolve()
+    console_free = interpreter.with_name("pythonw.exe")
+    python = str(console_free if console_free.exists() else interpreter).replace("'", "''")
+    script = str((ROOT / "dashboard_service.py").resolve()).replace("'", "''")
     working = str(ROOT.resolve()).replace("'", "''")
     task_name = TASK_NAME.replace("'", "''")
     powershell = rf"""
 $action = New-ScheduledTaskAction -Execute '{python}' -Argument '-u "{script}"' -WorkingDirectory '{working}'
+$atLogon = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
+$watchdog = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 15)
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
-Register-ScheduledTask -TaskName '{task_name}' -Action $action -Settings $settings -User "$env:USERDOMAIN\$env:USERNAME" -RunLevel Limited -Description 'Persistent local Polymarket research dashboard' -Force | Out-Null
+Register-ScheduledTask -TaskName '{task_name}' -Action $action -Trigger @($atLogon, $watchdog) -Settings $settings -User "$env:USERDOMAIN\$env:USERNAME" -RunLevel Limited -Description 'Persistent local Polymarket research dashboard' -Force | Out-Null
 """
     completed = subprocess.run(
         ["powershell", "-NoProfile", "-NonInteractive", "-Command", powershell],

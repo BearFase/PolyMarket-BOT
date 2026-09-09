@@ -19,7 +19,18 @@ paper-entry strategy is active.
    dashboard process and opens <http://127.0.0.1:8766/>.
 
 `Start All Bots.cmd` is retained as a compatibility shortcut. It calls the
-same `bot_launcher.py` implementation and does not launch a second stack.
+same `bot_launcher.py task-start` path and does not launch a second stack.
+
+The dashboard runs as the Windows task `Polymarket Research Dashboard`,
+executing `pythonw.exe dashboard_service.py`. `pythonw.exe` allocates no
+console, so the server cannot be killed by the CTRL_C / CTRL_CLOSE events
+that terminate a console process when an unrelated window in the same session
+closes. It has a logon trigger, so it returns after a reboot, and a trigger
+repeating every 15 minutes that restarts it if it ever died; `IgnoreNew`
+makes that repetition a no-op while it is healthy. `dashboard_service.py`
+also restores the stdout/stderr redirection into `dashboard_server.log` and
+`dashboard_server_error.log` that a console-less process would otherwise
+lose.
 
 Useful checks:
 
@@ -32,6 +43,8 @@ Useful checks:
 ## Current architecture
 
 - `bot_launcher.py` — idempotent dashboard lifecycle and health verification.
+- `dashboard_service.py` — console-free entry point used by the scheduled
+  task; redirects output to the dashboard logs before starting the server.
 - `dashboard_server.py` — background real-position, monitoring, edge, and
   dashboard orchestration.
 - `trader_dashboard.py` — Flask routes and static asset allowlist.
