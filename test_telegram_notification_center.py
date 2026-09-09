@@ -46,6 +46,12 @@ class SessionStub:
 
 class NotificationCenterTests(unittest.TestCase):
     def setUp(self):
+        # Pin the delivery gate. TelegramNotificationCenter.__init__ calls
+        # load_dotenv, and mock.patch.dict merges into os.environ rather than
+        # replacing it, so without this a local .env decides the outcome.
+        environment = mock.patch.dict("os.environ", {"TELEGRAM_NOTIFICATIONS_ENABLED": "true"})
+        environment.start()
+        self.addCleanup(environment.stop)
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)
         self.registry = nfl.NFLRegistry(root / "production.db", environment="production")

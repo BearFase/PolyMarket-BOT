@@ -13,7 +13,7 @@ if not exist "%BOT_PYTHON%" (
 )
 
 echo Starting Polymarket research dashboard...
-"%BOT_PYTHON%" bot_launcher.py start
+"%BOT_PYTHON%" bot_launcher.py task-start
 if errorlevel 1 (
   echo.
   echo Startup failed. The diagnostic above identifies the failure.
