@@ -18,7 +18,7 @@ print("[Test 1] Checking environment variables...")
 load_dotenv()
 
 required_vars = ["POLYMARKET_API_KEY", "POLYMARKET_API_SECRET"]
-optional_vars = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "POLYMARKET_WALLET"]
+optional_vars = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
 
 all_good = True
 for var in required_vars:

@@ -46,10 +46,19 @@ class SessionStub:
 
 class NotificationCenterTests(unittest.TestCase):
     def setUp(self):
-        # Pin the delivery gate. TelegramNotificationCenter.__init__ calls
+        # Pin every delivery gate. TelegramNotificationCenter.__init__ calls
         # load_dotenv, and mock.patch.dict merges into os.environ rather than
         # replacing it, so without this a local .env decides the outcome.
-        environment = mock.patch.dict("os.environ", {"TELEGRAM_NOTIFICATIONS_ENABLED": "true"})
+        # The master switch alone is not enough: load_settings reads a separate
+        # variable per notification type, and these tests assert DELIVERED and
+        # SUPPRESSED outcomes that any one of them can turn into SKIPPED.
+        environment = mock.patch.dict("os.environ", {
+            "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
+            "TELEGRAM_MORNING_BRIEF_ENABLED": "true",
+            "TELEGRAM_PREGAME_ALERTS_ENABLED": "true",
+            "TELEGRAM_FINAL_ALERTS_ENABLED": "true",
+            "TELEGRAM_SYSTEM_WARNINGS_ENABLED": "true",
+        })
         environment.start()
         self.addCleanup(environment.stop)
         self.temp = tempfile.TemporaryDirectory()
