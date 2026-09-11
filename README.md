@@ -59,6 +59,8 @@ Useful checks:
 - `nfl_postgame_research.py`, `postgame_research.js` — immutable research
   summaries and append-only analyst note revisions.
 - `paper_trader.py` — canonical paper ledger and authoritative settlement.
+- `nfl_trade_journal.py` — append-only journal of every observed NFL trade;
+  instrumentation only.
 - `telegram_notification_center.py` — deduplicated research notifications.
 - `sync_positions_api.py`, `monitor_positions.py` — read-only real-position
   synchronization and monitoring.
@@ -78,6 +80,16 @@ The MLB stream keeps its operational top-five display, while every new
 qualifying MLB moneyline execution is written first to the immutable
 `mlb_research.db` journal. Display limits are therefore no longer a research
 retention policy.
+
+Every NFL trade the stream delivers is also appended to the immutable
+`nfl_trade_journal.db` (`nfl_trade_journal.py`): sells, spreads and totals
+included, deduplicated on the exchange's trade id, never pruned. It is
+instrumentation only — raw capture keyed by Polymarket US event and market
+slugs, with canonical-game linkage left to analysis time. Coverage begins at
+the `coverage_started_at` recorded when capture first went live; nothing
+earlier was backfilled, because the pruned display tape is not a record of
+what traded. Each stream start appends a capture session, so outages show up
+as gaps. `python nfl_trade_journal.py status` reports coverage and integrity.
 
 ## MLB Research Registry
 

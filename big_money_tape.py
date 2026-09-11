@@ -27,11 +27,20 @@ from system_status import (
     set_stream_state,
 )
 
+try:
+    import nfl_trade_journal
+except Exception:  # a broken journal module must never stop the tape loading
+    nfl_trade_journal = None
+
 load_dotenv()
 
 HERE = Path(__file__).parent
 DB_FILE = HERE / "big_money_tape.db"
 MLB_RESEARCH_DB_FILE = HERE / "mlb_research.db"
+# None keeps the NFL journal beside DB_FILE. Tests point DB_FILE at a temporary
+# directory, so they isolate the journal automatically; a stray test row in an
+# append-only table could never be removed.
+NFL_JOURNAL_DB_FILE = None
 LOG_FILE = HERE / "big_money_tape.log"
 GATEWAY = "https://gateway.polymarket.us"
 WS_PATH = "/v1/ws/markets"
@@ -300,12 +309,29 @@ def _number(value):
         return 0.0
 
 
+def _nfl_journal_path():
+    if NFL_JOURNAL_DB_FILE:
+        return Path(NFL_JOURNAL_DB_FILE)
+    return Path(DB_FILE).with_name("nfl_trade_journal.db")
+
+
+def _report_nfl_journal_error(message):
+    log(message)
+    mark_error("nfl_trade_journal", message)
+
+
 def record_trade(trade):
     slug = trade.get("marketSlug") or trade.get("market_slug")
     with _market_lock:
         meta = _market_map.get(slug)
     if not meta:
         return False
+    if nfl_trade_journal is not None and meta.get("league") == "nfl":
+        # Journal every observed NFL trade before the display filters below
+        # discard sells and invalid prints. journal_trade never raises.
+        nfl_trade_journal.journal_trade(
+            _nfl_journal_path(), trade, meta,
+            on_error=_report_nfl_journal_error, on_stats=log)
     taker = trade.get("taker") or {}
     intent = taker.get("intent", "")
     if intent not in ("ORDER_INTENT_BUY_LONG", "ORDER_INTENT_BUY_SHORT"):
@@ -450,6 +476,13 @@ def run():
     init_db()
     load_known_markets()
     discover_markets()
+    if nfl_trade_journal is None:
+        _report_nfl_journal_error("NFL trade journal unavailable: module failed to import")
+    else:
+        session = nfl_trade_journal.start_capture_session(
+            _nfl_journal_path(), note="big_money_tape stream start",
+            on_error=_report_nfl_journal_error)
+        log(f"NFL trade journal capture session {session or 'FAILED TO START'}")
 
     def mlb_research_sync():
         from mlb_research import MLBResearchRegistry, fetch_schedule

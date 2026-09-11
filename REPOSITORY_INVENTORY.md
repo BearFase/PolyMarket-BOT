@@ -10,7 +10,7 @@ Runtime files remain on disk and are intentionally excluded from Git.
 
 `big_money_tape.py`, `dashboard_data.py`, `monitor_positions.py`,
 `nfl_daily_update.py`, `nfl_operations.py`, `nfl_postgame_research.py`,
-`nfl_research_report.py`, `nfl_schedule.py`, `paper_trader.py`,
+`nfl_research_report.py`, `nfl_schedule.py`, `nfl_trade_journal.py`, `paper_trader.py`,
 `price_history.py`, `settle_positions.py`, `sports_edge_finder.py`,
 `sync_positions_api.py`, `system_status.py`, and
 `telegram_notification_center.py`.
@@ -58,7 +58,8 @@ under `tests/fixtures/` are active tests or deterministic fixtures.
 - Real positions and UI state: `real_positions.json`, `price_history.json`,
   `monitor_state.json`, `system_status.json`, `sports_edges.json`,
   `todays_games.json`, and `whale_data.json`.
-- Trade/history databases: `big_money_tape.db` and `trader_scanner.db`.
+- Trade/history databases: `big_money_tape.db`, `trader_scanner.db`, and the
+  append-only `nfl_trade_journal.db`.
 - Operational state: every file under `.runtime/`, including
   `nfl_workflow_state.json`, `nfl_maintenance.json`, and dashboard PID state.
 - Logs: every root `*.log`, `monitor_log.txt`, and every file under `logs/`.
