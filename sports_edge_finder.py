@@ -107,13 +107,16 @@ def calculate_edges(registry: NFLRegistry, *, now: datetime | None = None) -> di
             skipped["incomplete_prices"] += 1
             continue
         # Both side prices must form a coherent probability pair before either
-        # can be compared with a vig-free book consensus. Polymarket US stamps
-        # a single market-level number on both marketSides of a market that has
-        # not opened for trading, so the two "prices" arrive nearly identical
-        # and sum to anything but one. Treated as probabilities those produce
-        # enormous fictional edges: every 2026 REG market observed on
-        # 2026-09-08 was of this form, with no bestBid, bestAsk or last trade,
-        # and yielded 25 "edges" between 40 and 69 percentage points.
+        # can be compared with a vig-free book consensus. Polymarket US does
+        # not publish a price per team here: `outcomePrices` is the bid and the
+        # ask of a SINGLE side, while `outcomes` carries two team names whose
+        # order does not track the prices. Both published numbers therefore
+        # describe the same team, arrive one tick apart, and sum to anything
+        # but one. Measured against Kalshi as an independent reference, the
+        # first entry sits a median 0.010 from that game's away-team price and
+        # 0.345 from the home team's. Read as two teams' probabilities they
+        # produce enormous fictional edges: on 2026-09-08 this yielded 25
+        # "edges" between 40 and 69 percentage points.
         pair_total = sum(market_prices.values())
         if not 0.97 <= pair_total <= 1.03:
             skipped["incoherent_prices"] += 1

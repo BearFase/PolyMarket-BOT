@@ -173,8 +173,15 @@ executable size — the depth simulator is load-bearing, not a refinement.
 
 ## 7. Fees — the blocking gap
 
-**Kalshi's API exposes no fee data whatsoever.** No fee field on the event or
-the market. The schedule lives only in a PDF at
+> **Corrected 2026-09-10.** The claim below that the API exposes no fee data
+> was wrong. `GET /series/fee_changes` returns `fee_type` and
+> `fee_multiplier` per series: `KXNFLGAME` is `quadratic_with_maker_fees` at
+> multiplier 1.0, `KXMLBGAME` at 0.5. The model, the maker-fee flag and the
+> multiplier are all machine-readable; only the **base constant** of the
+> quadratic is not. See [`economics_notes.md`](economics_notes.md) §2.
+
+**No fee field appears on the event or**
+the market objects themselves. The base constant lives only in a PDF at
 `kalshi.com/docs/kalshi-fee-schedule.pdf`, which returned HTTP 429 on two
 attempts and remains **unretrieved**.
 

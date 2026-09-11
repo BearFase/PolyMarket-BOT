@@ -1,0 +1,507 @@
+{
+  "rows": [
+    {
+      "game": "NFL-2026-REG-W1-ATL-PIT",
+      "away": "ATL",
+      "home": "PIT",
+      "poly_bid": 0.315,
+      "poly_ask": 0.32,
+      "poly_labels": [
+        "Falcons",
+        "Steelers"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.33,
+      "kalshi_home_ask": 0.69,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.015,
+      "best_cost": 1.01,
+      "gross_edge": -0.01,
+      "poly_leg_price": 0.32,
+      "kalshi_leg_price": 0.69
+    },
+    {
+      "game": "NFL-2026-REG-W1-BAL-IND",
+      "away": "BAL",
+      "home": "IND",
+      "poly_bid": 0.605,
+      "poly_ask": 0.61,
+      "poly_labels": [
+        "Colts",
+        "Ravens"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.61,
+      "kalshi_home_ask": 0.4,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.395,
+      "kalshi_leg_price": 0.61
+    },
+    {
+      "game": "NFL-2026-REG-W1-BUF-HOU",
+      "away": "BUF",
+      "home": "HOU",
+      "poly_bid": 0.515,
+      "poly_ask": 0.52,
+      "poly_labels": [
+        "Bills",
+        "Texans"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.52,
+      "kalshi_home_ask": 0.49,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.485,
+      "kalshi_leg_price": 0.52
+    },
+    {
+      "game": "NFL-2026-REG-W1-CHI-CAR",
+      "away": "CHI",
+      "home": "CAR",
+      "poly_bid": 0.6,
+      "poly_ask": 0.605,
+      "poly_labels": [
+        "Panthers",
+        "Bears"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.6,
+      "kalshi_home_ask": 0.4,
+      "cost_direction_a": 1.005,
+      "cost_direction_b": 1.0,
+      "best_cost": 1.0,
+      "gross_edge": 0.0,
+      "poly_leg_price": 0.4,
+      "kalshi_leg_price": 0.6
+    },
+    {
+      "game": "NFL-2026-REG-W1-CLE-JAX",
+      "away": "CLE",
+      "home": "JAX",
+      "poly_bid": 0.21,
+      "poly_ask": 0.215,
+      "poly_labels": [
+        "Browns",
+        "Jaguars"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.22,
+      "kalshi_home_ask": 0.79,
+      "cost_direction_a": 1.005,
+      "cost_direction_b": 1.01,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.215,
+      "kalshi_leg_price": 0.79
+    },
+    {
+      "game": "NFL-2026-REG-W1-NO-DET",
+      "away": "NO",
+      "home": "DET",
+      "poly_bid": 0.25,
+      "poly_ask": 0.255,
+      "poly_labels": [
+        "Saints",
+        "Lions"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.26,
+      "kalshi_home_ask": 0.75,
+      "cost_direction_a": 1.005,
+      "cost_direction_b": 1.01,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.255,
+      "kalshi_leg_price": 0.75
+    },
+    {
+      "game": "NFL-2026-REG-W1-NYJ-TEN",
+      "away": "NYJ",
+      "home": "TEN",
+      "poly_bid": 0.48,
+      "poly_ask": 0.485,
+      "poly_labels": [
+        "Titans",
+        "Jets"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.48,
+      "kalshi_home_ask": 0.52,
+      "cost_direction_a": 1.005,
+      "cost_direction_b": 1.0,
+      "best_cost": 1.0,
+      "gross_edge": 0.0,
+      "poly_leg_price": 0.52,
+      "kalshi_leg_price": 0.48
+    },
+    {
+      "game": "NFL-2026-REG-W1-TB-CIN",
+      "away": "TB",
+      "home": "CIN",
+      "poly_bid": 0.355,
+      "poly_ask": 0.36,
+      "poly_labels": [
+        "Bengals",
+        "Buccaneers"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.36,
+      "kalshi_home_ask": 0.64,
+      "cost_direction_a": 1.0,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.0,
+      "gross_edge": 0.0,
+      "poly_leg_price": 0.36,
+      "kalshi_leg_price": 0.64
+    },
+    {
+      "game": "NFL-2026-REG-W1-ARI-LAC",
+      "away": "ARI",
+      "home": "LAC",
+      "poly_bid": 0.185,
+      "poly_ask": 0.19,
+      "poly_labels": [
+        "Cardinals",
+        "Chargers"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.19,
+      "kalshi_home_ask": 0.81,
+      "cost_direction_a": 1.0,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.0,
+      "gross_edge": 0.0,
+      "poly_leg_price": 0.19,
+      "kalshi_leg_price": 0.81
+    },
+    {
+      "game": "NFL-2026-REG-W1-GB-MIN",
+      "away": "GB",
+      "home": "MIN",
+      "poly_bid": 0.465,
+      "poly_ask": 0.47,
+      "poly_labels": [
+        "Packers",
+        "Vikings"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.47,
+      "kalshi_home_ask": 0.54,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.535,
+      "kalshi_leg_price": 0.47
+    },
+    {
+      "game": "NFL-2026-REG-W1-MIA-LV",
+      "away": "MIA",
+      "home": "LV",
+      "poly_bid": 0.395,
+      "poly_ask": 0.4,
+      "poly_labels": [
+        "Dolphins",
+        "Raiders"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.4,
+      "kalshi_home_ask": 0.6,
+      "cost_direction_a": 1.0,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.0,
+      "gross_edge": 0.0,
+      "poly_leg_price": 0.4,
+      "kalshi_leg_price": 0.6
+    },
+    {
+      "game": "NFL-2026-REG-W1-WAS-PHI",
+      "away": "WAS",
+      "home": "PHI",
+      "poly_bid": 0.315,
+      "poly_ask": 0.32,
+      "poly_labels": [
+        "Eagles",
+        "Commanders"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.32,
+      "kalshi_home_ask": 0.68,
+      "cost_direction_a": 1.0,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.0,
+      "gross_edge": 0.0,
+      "poly_leg_price": 0.32,
+      "kalshi_leg_price": 0.68
+    },
+    {
+      "game": "NFL-2026-REG-W2-CAR-ATL",
+      "away": "CAR",
+      "home": "ATL",
+      "poly_bid": 0.465,
+      "poly_ask": 0.47,
+      "poly_labels": [
+        "Panthers",
+        "Falcons"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.48,
+      "kalshi_home_ask": 0.53,
+      "cost_direction_a": 1.0,
+      "cost_direction_b": 1.015,
+      "best_cost": 1.0,
+      "gross_edge": 0.0,
+      "poly_leg_price": 0.47,
+      "kalshi_leg_price": 0.53
+    },
+    {
+      "game": "NFL-2026-REG-W2-CIN-HOU",
+      "away": "CIN",
+      "home": "HOU",
+      "poly_bid": 0.435,
+      "poly_ask": 0.44,
+      "poly_labels": [
+        "Bengals",
+        "Texans"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.44,
+      "kalshi_home_ask": 0.57,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.565,
+      "kalshi_leg_price": 0.44
+    },
+    {
+      "game": "NFL-2026-REG-W2-CLE-TB",
+      "away": "CLE",
+      "home": "TB",
+      "poly_bid": 0.26,
+      "poly_ask": 0.265,
+      "poly_labels": [
+        "Buccaneers",
+        "Browns"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.28,
+      "kalshi_home_ask": 0.73,
+      "cost_direction_a": 0.995,
+      "cost_direction_b": 1.02,
+      "best_cost": 0.995,
+      "gross_edge": 0.005,
+      "poly_leg_price": 0.265,
+      "kalshi_leg_price": 0.73
+    },
+    {
+      "game": "NFL-2026-REG-W2-GB-NYJ",
+      "away": "GB",
+      "home": "NYJ",
+      "poly_bid": 0.675,
+      "poly_ask": 0.68,
+      "poly_labels": [
+        "Packers",
+        "Jets"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.7,
+      "kalshi_home_ask": 0.33,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.025,
+      "best_cost": 1.01,
+      "gross_edge": -0.01,
+      "poly_leg_price": 0.68,
+      "kalshi_leg_price": 0.33
+    },
+    {
+      "game": "NFL-2026-REG-W2-MIN-CHI",
+      "away": "MIN",
+      "home": "CHI",
+      "poly_bid": 0.39,
+      "poly_ask": 0.395,
+      "poly_labels": [
+        "Bears",
+        "Vikings"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.41,
+      "kalshi_home_ask": 0.61,
+      "cost_direction_a": 1.005,
+      "cost_direction_b": 1.02,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.395,
+      "kalshi_leg_price": 0.61
+    },
+    {
+      "game": "NFL-2026-REG-W2-NO-BAL",
+      "away": "NO",
+      "home": "BAL",
+      "poly_bid": 0.215,
+      "poly_ask": 0.22,
+      "poly_labels": [
+        "Ravens",
+        "Saints"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.22,
+      "kalshi_home_ask": 0.79,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.005,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.785,
+      "kalshi_leg_price": 0.22
+    },
+    {
+      "game": "NFL-2026-REG-W2-PHI-TEN",
+      "away": "PHI",
+      "home": "TEN",
+      "poly_bid": 0.69,
+      "poly_ask": 0.695,
+      "poly_labels": [
+        "Eagles",
+        "Titans"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.7,
+      "kalshi_home_ask": 0.31,
+      "cost_direction_a": 1.005,
+      "cost_direction_b": 1.01,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.695,
+      "kalshi_leg_price": 0.31
+    },
+    {
+      "game": "NFL-2026-REG-W2-PIT-NE",
+      "away": "PIT",
+      "home": "NE",
+      "poly_bid": 0.355,
+      "poly_ask": 0.36,
+      "poly_labels": [
+        "Steelers",
+        "Patriots"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.37,
+      "kalshi_home_ask": 0.66,
+      "cost_direction_a": 1.02,
+      "cost_direction_b": 1.015,
+      "best_cost": 1.015,
+      "gross_edge": -0.015,
+      "poly_leg_price": 0.645,
+      "kalshi_leg_price": 0.37
+    },
+    {
+      "game": "NFL-2026-REG-W2-JAX-DEN",
+      "away": "JAX",
+      "home": "DEN",
+      "poly_bid": 0.42,
+      "poly_ask": 0.425,
+      "poly_labels": [
+        "Broncos",
+        "Jaguars"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.43,
+      "kalshi_home_ask": 0.59,
+      "cost_direction_a": 1.015,
+      "cost_direction_b": 1.01,
+      "best_cost": 1.01,
+      "gross_edge": -0.01,
+      "poly_leg_price": 0.58,
+      "kalshi_leg_price": 0.43
+    },
+    {
+      "game": "NFL-2026-REG-W2-LV-LAC",
+      "away": "LV",
+      "home": "LAC",
+      "poly_bid": 0.2,
+      "poly_ask": 0.205,
+      "poly_labels": [
+        "Raiders",
+        "Chargers"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.21,
+      "kalshi_home_ask": 0.8,
+      "cost_direction_a": 1.005,
+      "cost_direction_b": 1.01,
+      "best_cost": 1.005,
+      "gross_edge": -0.005,
+      "poly_leg_price": 0.205,
+      "kalshi_leg_price": 0.8
+    },
+    {
+      "game": "NFL-2026-REG-W2-MIA-SF",
+      "away": "MIA",
+      "home": "SF",
+      "poly_bid": 0.145,
+      "poly_ask": 0.15,
+      "poly_labels": [
+        "Dolphins",
+        "49ers"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.16,
+      "kalshi_home_ask": 0.86,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.015,
+      "best_cost": 1.01,
+      "gross_edge": -0.01,
+      "poly_leg_price": 0.15,
+      "kalshi_leg_price": 0.86
+    },
+    {
+      "game": "NFL-2026-REG-W2-SEA-ARI",
+      "away": "SEA",
+      "home": "ARI",
+      "poly_bid": 0.73,
+      "poly_ask": 0.74,
+      "poly_labels": [
+        "Seahawks",
+        "Cardinals"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.75,
+      "kalshi_home_ask": 0.27,
+      "cost_direction_a": 1.01,
+      "cost_direction_b": 1.02,
+      "best_cost": 1.01,
+      "gross_edge": -0.01,
+      "poly_leg_price": 0.74,
+      "kalshi_leg_price": 0.27
+    },
+    {
+      "game": "NFL-2026-REG-W2-WAS-DAL",
+      "away": "WAS",
+      "home": "DAL",
+      "poly_bid": 0.33,
+      "poly_ask": 0.335,
+      "poly_labels": [
+        "Cowboys",
+        "Commanders"
+      ],
+      "poly_fee_coefficient": 0.06,
+      "kalshi_away_ask": 0.35,
+      "kalshi_home_ask": 0.69,
+      "cost_direction_a": 1.025,
+      "cost_direction_b": 1.02,
+      "best_cost": 1.02,
+      "gross_edge": -0.02,
+      "poly_leg_price": 0.67,
+      "kalshi_leg_price": 0.35
+    }
+  ],
+  "kalshi_fee_multiplier": 1.0,
+  "poly_fee_shape": "coefficient * contracts * price * (1 - price)",
+  "kalshi_base_constant": "UNRESOLVED"
+}
