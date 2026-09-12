@@ -59,8 +59,8 @@ Useful checks:
 - `nfl_postgame_research.py`, `postgame_research.js` — immutable research
   summaries and append-only analyst note revisions.
 - `paper_trader.py` — canonical paper ledger and authoritative settlement.
-- `nfl_trade_journal.py` — append-only journal of every observed NFL trade;
-  instrumentation only.
+- `trade_journal.py` — per-league append-only journals of every observed NFL
+  and MLB trade; instrumentation only.
 - `telegram_notification_center.py` — deduplicated research notifications.
 - `sync_positions_api.py`, `monitor_positions.py` — read-only real-position
   synchronization and monitoring.
@@ -78,26 +78,39 @@ undifferentiated chronological tape:
 
 The MLB stream keeps its operational top-five display, while every new
 qualifying MLB moneyline execution is written first to the immutable
-`mlb_research.db` journal. Display limits are therefore no longer a research
-retention policy.
+`mlb_research.db` journal. "Qualifying" means a taker BUY_LONG or BUY_SHORT on
+a moneyline at or above the display threshold: that journal never recorded
+taker sells, ORDER_INTENT_UNDEFINED trades, run lines or totals, so it is a
+record of large buys, not of total MLB trading. Display limits are therefore
+no longer a research retention policy.
 
-Every NFL trade the stream delivers is also appended to the immutable
-`nfl_trade_journal.db` (`nfl_trade_journal.py`): sells, spreads and totals
-included, deduplicated on the exchange's trade id, never pruned. It is
+Every NFL and MLB trade the stream delivers is also appended, in full, to a
+per-league immutable journal (`trade_journal.py`): `nfl_trade_journal.db` and
+`mlb_trade_journal.db`. Sells are included and every market type the stream
+delivers is recorded; trades are deduplicated on the exchange's trade id, and
+nothing is ever pruned. As of 2026-09-11 the stream had delivered no NFL or MLB
+spread or total trade at all, although those markets are subscribed; the likely
+cause, a per-connection subscription limit, is unconfirmed. It is
 instrumentation only — raw capture keyed by Polymarket US event and market
-slugs, with canonical-game linkage left to analysis time. Coverage begins at
-the `coverage_started_at` recorded when capture first went live; nothing
-earlier was backfilled, because the pruned display tape is not a record of
-what traded. Each stream start appends a capture session, so outages show up
-as gaps. `python nfl_trade_journal.py status` reports coverage and integrity.
+slugs, with canonical-game linkage left to analysis time. Each journal's
+coverage begins at its own `coverage_started_at`; nothing earlier was
+backfilled, because the pruned display tape is not a record of what traded.
+MLB full-flow coverage therefore starts later than the buy-only
+`mlb_research.db` journal, and the two are separate coverage regimes that must
+not be combined as if either were complete. Each stream start appends a
+capture session, so outages show up as gaps. `python trade_journal.py status`
+reports coverage and integrity for both.
 
 ## MLB Research Registry
 
 `mlb_research.py` maintains a separate canonical MLB research registry backed
 by structured MLB schedule/result identifiers. It preserves schedule revisions,
 doubleheader identity, append-only moneyline executions, source-link rejections,
-and immutable sportsbook snapshots. Existing pruned tape rows are retained as
-`LEGACY_INCOMPLETE` and excluded from authoritative research totals.
+and immutable sportsbook snapshots. Pruned tape rows are copied in as
+`LEGACY_INCOMPLETE` when the tape starts and every 30 minutes, and are excluded
+from authoritative research totals. Since live journaling began, each of them
+duplicates a live row (all 1,064 did on 2026-09-11), so any direct query of
+`mlb_trade_observations` must filter `legacy_incomplete = 0`.
 
 ```powershell
 python mlb_research.py sync-schedule
