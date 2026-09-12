@@ -91,6 +91,68 @@ Price buckets, fill level: 0–25¢ empty; 25–50¢ n=57, +60m mean 1.43 (n=22)
 - **Three quiet stretches over 20 minutes**, the longest 12.8h (a PC shutdown on 2026-09-10/11).
   Only 2 large events have one inside their 60-minute window.
 
+## Post-specification sensitivity analysis prompted by observed multi-price same-timestamp executions
+
+Not part of the pre-registration and not a replacement for it — the frozen results above are
+unchanged. This view exists because the exchange showed that one aggressive execution can walk
+several price levels inside a single timestamp: 4,655 instants (4.8%) carry fills at more than one
+price, and 17 of the 196 pregame large fills sit inside one, 11 of them paying the sweep's top tick.
+Treating a $17,289 execution as unrelated events because it printed at 49.5¢ and 50.0¢ would be
+economically misleading.
+
+**Sweep cluster**: all fills sharing canonical market, buyer side/intent and the exact exchange
+timestamp, at any execution price, with every underlying exchange id preserved. Aggregate executed
+dollars decide the ≥ $1,000 cohort, and t0 is the size-weighted average execution price (VWAP). This
+is a *same-instant execution sweep*, never a single submitted order. Impact compares the first
+same-side fill strictly after the whole timestamp, so walking the book is never counted as
+post-trade impact.
+
+Cohort: **192 sweep clusters**, absorbing all 196 fill-level and all 194 cluster-level events, with
+**14 newly qualifying** because every component fill is under $1,000. 60 hold more than one fill but
+only 13 span more than one price. Aggregate dollars: median $2,198, max $27,547.
+
+| horizon | mean fill / cluster / sweep | median (all three) | n fill / cluster / sweep |
+| --- | --- | --- | --- |
+| impact | −0.10 / −0.10 / −0.06 | 0.00 | 196 / 193 / 191 |
+| +5m | −0.00 / −0.03 / 0.01 | 0.00 | 163 / 161 / 159 |
+| +15m | 0.15 / 0.11 / 0.15 | 0.00 | 139 / 139 / 137 |
+| +30m | 0.25 / 0.18 / 0.23 | 0.00 | 111 / 113 / 111 |
+| +60m | 0.32 / 0.23 / 0.29 | 0.00 | 89 / 89 / 88 |
+
+The definition is not driving the outcome. Sweep controls at +60m: $100–$1,000 mean 0.25 and $5–$100
+mean 0.04, against 0.29 for the large cohort.
+
+The `sea-ath` outlier is now understood. That instant is 10 fills walking 0.595 → 0.850, $1,796
+aggregate; a VWAP t0 of 0.7566 gives −15.16¢ where the frozen top-tick t0 of 0.8500 gave −24.50¢.
+Part of the tail was the worst-tick choice, and the rest is a real adverse repricing to 0.605.
+
+**Rate columns are not comparable across definitions.** A VWAP rarely lands on the 0.5¢ tick, so an
+unchanged market registers as a sub-tick non-zero move: zero-movement at impact falls from 92.3% to
+74.9% mechanically, and the 25–50¢ bucket shows a symmetric 21.1% positive / 21.1% negative at
+impact. Compare medians and means across definitions; compare pos/zero/neg rates only within one.
+
+## Final subgroup check: the 25–50¢ bucket
+
+The one subgroup with a visibly larger drift, tested with the existing definitions and cohorts. No
+new thresholds, windows or exclusions.
+
+Matched controls at +60m, in cents, as sweep view / frozen fill view:
+
+| cohort | all markets | same markets as the ≥ $1k events |
+| --- | --- | --- |
+| ≥ $1,000 | 1.10 (n=24) / 1.43 (n=22) | the same events |
+| $100–$1,000 | 0.23 (n=184) / 0.30 (n=211) | 0.32 (n=144) / 0.37 (n=167) |
+| $5–$100 | −0.04 (n=2,898) / −0.00 (n=3,199) | −0.05 (n=2,125) / −0.01 (n=2,348) |
+
+The size ordering survives the match, so the remaining question is concentration — and it is
+concentrated. **One game supplies the drift.** `aec-mlb-phi-atl-2026-09-12` contributes 4 of the 24
+sweep events and +23.63¢ of the total, all SHORT buys between 03:33Z and 03:43Z. Excluding that one
+market the mean falls to **+0.14¢ over n=20 in 15 markets**, and only 6 of 16 markets have a positive
+mean. The frozen fill view agrees: excluding it, +0.06¢ at +60m, with 2 of 14 markets positive.
+
+The 25–50¢ drift is therefore **one episode in one market, not a size effect**. It is not a finding,
+and it is not worth pursuing further on this dataset.
+
 ## What this does not show
 
 No claim of predictive value or profitability is made or supported. A follower pays the Polymarket US
@@ -102,10 +164,15 @@ the Leadership question belongs to them, not to this history.
 ## Conclusion, narrowly
 
 In this sample, large pregame MLB buys show **no meaningful immediate price impact**: the median is
-0.00¢ at every horizon under both definitions. There is modest later positive drift, but ordinary
-$100–$1,000 flow drifts nearly as much (+0.28 against +0.32 at +60m), so **trade size alone has not
-demonstrated a distinct price-moving effect here**. The 25–50¢ bucket is the only subgroup with a
-visibly larger drift and is recorded as a lead requiring a matched control, not as a finding.
+0.00¢ at every horizon under all three definitions. There is modest later positive drift, but
+ordinary $100–$1,000 flow drifts nearly as much (+0.28 against +0.32 at +60m), so **trade size alone
+has not demonstrated a distinct price-moving effect here**. The 25–50¢ bucket looked like the
+exception until the matched control and concentration check dissolved it into a single game.
+
+Impact and Persistence are complete for this historical dataset, and were not extended after the
+results were seen. The Leadership question — whether the market was already moving before a large
+execution, or the execution came first — belongs to the accumulating full-flow journals, which record
+sells, sub-$5 fills and the complete local sequence that this buy-only history cannot show.
 
 ## Files
 
@@ -113,5 +180,11 @@ visibly larger drift and is recorded as a lead requiring a matched control, not 
 | --- | --- |
 | `impact_step1.py` | base dataset, execution clusters, sample-change and price-structure checks used to fix the method |
 | `impact_persistence.py` | the frozen pre-registered primary analysis |
+| `sweep_sensitivity.py` | post-specification sweep-cluster sensitivity analysis |
+| `bucket_matched_control.py` | 25–50¢ matched controls, existing definitions only |
+| `tail_concentration.py` | concentration diagnostic for the 25–50¢ cohort |
 | `results/definition_comparison_2026-09-12.txt` | output of `impact_step1.py` |
 | `results/impact_persistence_raw_2026-09-12.txt` | output of `impact_persistence.py` — all frozen tables |
+| `results/sweep_sensitivity_raw_2026-09-12.txt` | output of `sweep_sensitivity.py` |
+| `results/bucket_matched_control_2026-09-12.txt` | output of `bucket_matched_control.py` |
+| `results/tail_concentration_2026-09-12.txt` | output of `tail_concentration.py` |
