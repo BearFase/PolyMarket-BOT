@@ -54,6 +54,8 @@ Useful checks:
 - `nfl_schedule.py` — canonical NFL schedule, strict source linkage,
   simulations, results, and production/development registry separation.
 - `nfl_daily_update.py` — isolated, idempotent production research workflow.
+- `workflow_service.py` — console-free entry point the hourly task runs under
+  `pythonw.exe`; keeps the workflow's printed output in `logs/workflow_console.log`.
 - `nfl_operations.py`, `health_check.py` — locking, atomic operational state,
   rotating logs, maintenance, scheduler and health observability.
 - `nfl_postgame_research.py`, `postgame_research.js` — immutable research
@@ -233,7 +235,9 @@ powershell -ExecutionPolicy Bypass -File .\remove_task_scheduler.ps1
 
 The standard task runs while this Windows user is logged in; the dashboard
 does not need to be open. Fully logged-out execution requires an elevated S4U
-registration. Logs rotate under `logs/workflow.log`.
+registration. The task runs `pythonw.exe workflow_service.py`, so no console
+window opens each hour. Logs rotate under `logs/workflow.log`, and anything the
+workflow prints goes to `logs/workflow_console.log`.
 
 ## Health Check
 

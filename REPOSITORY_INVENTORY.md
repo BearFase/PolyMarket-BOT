@@ -29,6 +29,7 @@ NFL-registry scanner, not the retired title-matching implementation.
 
 `bot_launcher.py`, `Open Dashboard.cmd`, `Start All Bots.cmd`,
 `health_check.py`, `setup_task_scheduler.ps1`, `remove_task_scheduler.ps1`,
+`workflow_service.py`,
 `get_positions.py`, `telegram_setup.py`, and `test_all_systems.py`.
 
 `Open Dashboard.cmd` is the canonical one-click UI launcher.
@@ -136,7 +137,8 @@ dynamic-file review.
 - Flask serves both dashboard HTML files, three JavaScript bundles, generated
   dashboard data, real positions, sports edges, system status, Game Flow, and
   post-game research APIs.
-- Task Scheduler calls `.venv/Scripts/python.exe nfl_daily_update.py` with the
+- Task Scheduler calls `.venv/Scripts/pythonw.exe workflow_service.py`, which
+  runs `nfl_daily_update.py` without opening a console window, with the
   repository as its working directory.
 - The NFL workflow imports the canonical registry, operational safeguards,
   post-game research, simulation report, paper settlement engine, and Telegram
