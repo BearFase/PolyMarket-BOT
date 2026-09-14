@@ -130,6 +130,20 @@ def log_audit(message):
     with open(AUDIT_LOG, 'a', encoding='utf-8') as f:
         f.write(f"[{timestamp}] {message}\n")
 
+def _required_money(pos, field, slug):
+    """A position's cost or cashValue, refusing to invent one.
+
+    A null or missing value is an error rather than a zero: a fabricated zero
+    would show on the dashboard as a real profit or loss.
+    """
+    raw = pos.get(field)
+    if isinstance(raw, dict):
+        raw = raw.get("value")
+    if raw is None:
+        raise ValueError(f"exchange sent no {field} for {slug}")
+    return float(raw)
+
+
 def parse_position(slug, pos, position_id, market_context=None):
     """Convert one raw API position into our tracked format.
 
@@ -146,12 +160,14 @@ def parse_position(slug, pos, position_id, market_context=None):
       - Payout: qty shares pay $1 each if your team wins; $0 if it loses.
     Do NOT branch bet direction on the netPosition sign.
     """
-    meta = pos.get("marketMetadata", {})
+    meta = pos.get("marketMetadata") or {}
     net_pos = float(pos.get("netPositionDecimal", pos.get("netPosition", "0")))
     qty = abs(net_pos)
-    cost = float(pos.get("cost", {}).get("value", "0"))
-    cash_value = float(pos.get("cashValue", {}).get("value", "0"))
-    fees = float(pos.get("fees", {}).get("value", "0"))
+    cost = _required_money(pos, "cost", slug)
+    cash_value = _required_money(pos, "cashValue", slug)
+    # The exchange can send "fees": null (seen 2026-09-13). Fees are shown for
+    # reference and never enter P&L, so a null is displayed as 0.
+    fees = _money(pos.get("fees"))
 
     market_title = meta.get('title', slug)
     team_color = (meta.get('team') or {}).get('colorPrimary', '')
@@ -265,13 +281,28 @@ def sync_positions():
     except Exception as e:
         log_audit(f"WARN: settlement check failed: {e}")
 
+    previous = {old.get("market_slug"): old for old in existing_data.get("positions", [])
+                if isinstance(old, dict)}
+    skipped = []
     new_positions = []
     for i, (slug, pos) in enumerate(positions_dict.items(), start=1):
-        p = parse_position(slug, pos, i, market_context.get(slug))
+        try:
+            p = parse_position(slug, pos, i, market_context.get(slug))
+        except (AttributeError, KeyError, TypeError, ValueError) as e:
+            # One malformed position must never freeze every other position:
+            # on 2026-09-13 a single "fees": null stopped all syncs for hours.
+            skipped.append(slug)
+            log_audit(f"WARN: position {slug} not parsed: {e}")
+            print(f"[WARN] position {slug} not parsed: {e}")
+            if slug in previous:
+                kept = dict(previous[slug], id=f"real_{i:03d}", stale=True)
+                kept["status_note"] = "Latest exchange data could not be parsed; showing last verified mark."
+                new_positions.append(kept)
+            continue
         new_positions.append(p)
         # Log parser path for validation (subject vs outcome)
-        meta = pos.get("marketMetadata", {})
-        parser_path = "subject" if meta.get("subject", {}).get("name") else "outcome"
+        meta = pos.get("marketMetadata") or {}
+        parser_path = "subject" if (meta.get("subject") or {}).get("name") else "outcome"
         log_audit(f"Position: {p['market']} | {p['side']} {p['outcome']} | P&L: ${p['pnl']:.2f} [parsed via {parser_path}]")
 
     api_event_slugs = {p.get("event_slug") for p in new_positions}
@@ -330,6 +361,7 @@ def sync_positions():
         "unrealized_pnl": round(total_open_pnl, 2),
         "last_sync": datetime.now(timezone.utc).isoformat(),
         "sync_source": "polymarket_us_api",
+        "skipped_positions": skipped,
         "note": "Equity and all-time P&L are reconciled from exchange positions, buying power, and completed funding activity.",
     }
 
