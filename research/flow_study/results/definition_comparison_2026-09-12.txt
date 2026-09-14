@@ -1,0 +1,26 @@
+live rows 119516; markets 72; games 72; trade times 2026-09-09 05:14Z .. 2026-09-12 10:11Z
+selected_side values {'SHORT': 60353, 'LONG': 59163}
+pregame_classification {'PREGAME': 20316, 'IN_GAME': 99200}
+rows with no canonical game link: 0
+
+clusters 103600; multi-fill clusters 11176 covering 27092 rows (22.7% of fills); fills per cluster {1: 92424, 2: 8141, 3: 2109, 4: 576, 5: 180, 6: 75, 7: 42, 8: 19, 9: 14, 10: 6, 11: 4, 12: 4, 13: 1, 14: 1, 15: 2, 19: 1, 29: 1}
+
+=== all trades: large-buy sample at >= $1000 ===
+  fill level   : 1185 events
+  cluster level: 1115 events
+    of those, only visible once fills are summed (every fill < $1000): 156
+    clusters holding more than one >= $1000 fill (fill level counts them separately): 152
+    newly qualifying cluster totals: min $1,000 (2 fills), median $1,303, max $3,581 (7 fills)
+    cluster-level sizes: median $1,994, max $153,615
+
+=== pregame only: large-buy sample at >= $1000 ===
+  fill level   : 196 events
+  cluster level: 194 events
+    of those, only visible once fills are summed (every fill < $1000): 12
+    clusters holding more than one >= $1000 fill (fill level counts them separately): 11
+    newly qualifying cluster totals: min $1,023 (2 fills), median $1,488, max $2,417 (19 fills)
+    cluster-level sizes: median $2,229, max $27,547
+
+price checks on consecutive fills in one market within 60s:
+  opposite-side pairs 38281: paid_long + paid_short median 1.0050 (1.0 + spread expected), 10th/90th pct 1.0050/1.0100
+  |change| in LONG-equivalent price: opposite-side median 0.0050, same-side median 0.0000 (75055 same-side pairs) <- bid/ask bounce vs real moves

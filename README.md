@@ -19,7 +19,18 @@ paper-entry strategy is active.
    dashboard process and opens <http://127.0.0.1:8766/>.
 
 `Start All Bots.cmd` is retained as a compatibility shortcut. It calls the
-same `bot_launcher.py` implementation and does not launch a second stack.
+same `bot_launcher.py task-start` path and does not launch a second stack.
+
+The dashboard runs as the Windows task `Polymarket Research Dashboard`,
+executing `pythonw.exe dashboard_service.py`. `pythonw.exe` allocates no
+console, so the server cannot be killed by the CTRL_C / CTRL_CLOSE events
+that terminate a console process when an unrelated window in the same session
+closes. It has a logon trigger, so it returns after a reboot, and a trigger
+repeating every 15 minutes that restarts it if it ever died; `IgnoreNew`
+makes that repetition a no-op while it is healthy. `dashboard_service.py`
+also restores the stdout/stderr redirection into `dashboard_server.log` and
+`dashboard_server_error.log` that a console-less process would otherwise
+lose.
 
 Useful checks:
 
@@ -32,6 +43,8 @@ Useful checks:
 ## Current architecture
 
 - `bot_launcher.py` — idempotent dashboard lifecycle and health verification.
+- `dashboard_service.py` — console-free entry point used by the scheduled
+  task; redirects output to the dashboard logs before starting the server.
 - `dashboard_server.py` — background real-position, monitoring, edge, and
   dashboard orchestration.
 - `trader_dashboard.py` — Flask routes and static asset allowlist.
@@ -41,11 +54,15 @@ Useful checks:
 - `nfl_schedule.py` — canonical NFL schedule, strict source linkage,
   simulations, results, and production/development registry separation.
 - `nfl_daily_update.py` — isolated, idempotent production research workflow.
+- `workflow_service.py` — console-free entry point the hourly task runs under
+  `pythonw.exe`; keeps the workflow's printed output in `logs/workflow_console.log`.
 - `nfl_operations.py`, `health_check.py` — locking, atomic operational state,
   rotating logs, maintenance, scheduler and health observability.
 - `nfl_postgame_research.py`, `postgame_research.js` — immutable research
   summaries and append-only analyst note revisions.
 - `paper_trader.py` — canonical paper ledger and authoritative settlement.
+- `trade_journal.py` — per-league append-only journals of every observed NFL
+  and MLB trade; instrumentation only.
 - `telegram_notification_center.py` — deduplicated research notifications.
 - `sync_positions_api.py`, `monitor_positions.py` — read-only real-position
   synchronization and monitoring.
@@ -63,16 +80,39 @@ undifferentiated chronological tape:
 
 The MLB stream keeps its operational top-five display, while every new
 qualifying MLB moneyline execution is written first to the immutable
-`mlb_research.db` journal. Display limits are therefore no longer a research
-retention policy.
+`mlb_research.db` journal. "Qualifying" means a taker BUY_LONG or BUY_SHORT on
+a moneyline at or above the display threshold: that journal never recorded
+taker sells, ORDER_INTENT_UNDEFINED trades, run lines or totals, so it is a
+record of large buys, not of total MLB trading. Display limits are therefore
+no longer a research retention policy.
+
+Every NFL and MLB trade the stream delivers is also appended, in full, to a
+per-league immutable journal (`trade_journal.py`): `nfl_trade_journal.db` and
+`mlb_trade_journal.db`. Sells are included and every market type the stream
+delivers is recorded; trades are deduplicated on the exchange's trade id, and
+nothing is ever pruned. As of 2026-09-11 the stream had delivered no NFL or MLB
+spread or total trade at all, although those markets are subscribed; the likely
+cause, a per-connection subscription limit, is unconfirmed. It is
+instrumentation only — raw capture keyed by Polymarket US event and market
+slugs, with canonical-game linkage left to analysis time. Each journal's
+coverage begins at its own `coverage_started_at`; nothing earlier was
+backfilled, because the pruned display tape is not a record of what traded.
+MLB full-flow coverage therefore starts later than the buy-only
+`mlb_research.db` journal, and the two are separate coverage regimes that must
+not be combined as if either were complete. Each stream start appends a
+capture session, so outages show up as gaps. `python trade_journal.py status`
+reports coverage and integrity for both.
 
 ## MLB Research Registry
 
 `mlb_research.py` maintains a separate canonical MLB research registry backed
 by structured MLB schedule/result identifiers. It preserves schedule revisions,
 doubleheader identity, append-only moneyline executions, source-link rejections,
-and immutable sportsbook snapshots. Existing pruned tape rows are retained as
-`LEGACY_INCOMPLETE` and excluded from authoritative research totals.
+and immutable sportsbook snapshots. Pruned tape rows are copied in as
+`LEGACY_INCOMPLETE` when the tape starts and every 30 minutes, and are excluded
+from authoritative research totals. Since live journaling began, each of them
+duplicates a live row (all 1,064 did on 2026-09-11), so any direct query of
+`mlb_trade_observations` must filter `legacy_incomplete = 0`.
 
 ```powershell
 python mlb_research.py sync-schedule
@@ -195,7 +235,9 @@ powershell -ExecutionPolicy Bypass -File .\remove_task_scheduler.ps1
 
 The standard task runs while this Windows user is logged in; the dashboard
 does not need to be open. Fully logged-out execution requires an elevated S4U
-registration. Logs rotate under `logs/workflow.log`.
+registration. The task runs `pythonw.exe workflow_service.py`, so no console
+window opens each hour. Logs rotate under `logs/workflow.log`, and anything the
+workflow prints goes to `logs/workflow_console.log`.
 
 ## Health Check
 

@@ -112,11 +112,16 @@ def monitor_positions():
         alerts = []
         
         for slug, pos in positions_dict.items():
-            meta = pos.get("marketMetadata", {})
+            meta = pos.get("marketMetadata") or {}
             market_title = meta.get("title", slug)
             net_pos = float(pos.get("netPositionDecimal", "0"))
-            cost = float(pos.get("cost", {}).get("value", "0"))
-            cash_value = float(pos.get("cashValue", {}).get("value", "0"))
+            cost = (pos.get("cost") or {}).get("value")
+            cash_value = (pos.get("cashValue") or {}).get("value")
+            if cost is None or cash_value is None:
+                # No valuation from the exchange: skip it rather than alert on a fake zero.
+                log_event(f"Position: {market_title} | skipped, exchange sent no cost or cashValue")
+                continue
+            cost, cash_value = float(cost), float(cash_value)
             # cashValue is the stake valued at your team's current price, so this
             # holds for every position regardless of netPosition sign (see
             # sync_positions_api.parse_position for the exchange semantics).

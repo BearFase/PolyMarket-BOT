@@ -1,0 +1,99 @@
+{
+  "event_ticker": "KXMLBGAME-26SEP101215TBATL",
+  "series_ticker": "KXMLBGAME",
+  "title": "Tampa Bay vs Atlanta",
+  "sub_title": "TB vs ATL (Sep 10)",
+  "category": "Sports",
+  "mutually_exclusive": true,
+  "collateral_return_type": "MECNET",
+  "product_metadata": {
+    "competition": "Pro Baseball",
+    "competition_scope": "Game"
+  },
+  "settlement_sources": [
+    {
+      "name": "ESPN",
+      "url": "https://www.espn.com"
+    },
+    {
+      "name": "Fox Sports",
+      "url": "https://www.foxsports.com"
+    },
+    {
+      "name": "the Governing League",
+      "url": "https://www.mlb.com/"
+    }
+  ],
+  "markets": [
+    {
+      "ticker": "KXMLBGAME-26SEP101215TBATL-TB",
+      "title": "Tampa Bay wins",
+      "yes_sub_title": "Tampa Bay",
+      "no_sub_title": "Tampa Bay",
+      "market_type": "binary",
+      "strike_type": "structured",
+      "status": "active",
+      "open_time": "2026-09-07T16:25:00Z",
+      "close_time": "2026-09-13T16:15:00Z",
+      "expiration_time": "2026-09-13T16:15:00Z",
+      "occurrence_datetime": "2026-09-10T19:15:00Z",
+      "result": "",
+      "can_close_early": true,
+      "settlement_timer_seconds": 120,
+      "notional_value_dollars": "1.0000",
+      "price_level_structure": "linear_cent",
+      "price_ranges": [
+        {
+          "end": "1.0000",
+          "start": "0.0000",
+          "step": "0.0100"
+        }
+      ],
+      "yes_bid_dollars": "0.4700",
+      "yes_ask_dollars": "0.4800",
+      "no_bid_dollars": "0.5200",
+      "no_ask_dollars": "0.5300",
+      "liquidity_dollars": "0.0000",
+      "rules_primary": "If Tampa Bay wins the Tampa Bay vs Atlanta professional baseball game originally scheduled for Sep 10, 2026 at 12:15 PM EDT, then the market resolves to Yes.",
+      "rules_secondary": "The following market refers to the Tampa Bay vs Atlanta professional baseball game originally scheduled for Sep 10, 2026 at 12:15 PM EDT. If this game is postponed or delayed, the market will remain open and close after the rescheduled game has finished (within two days). If the game is cancelled or rescheduled to over two days away, the market will resolve to a fair price in accordance with the rules.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+      "custom_strike": {
+        "baseball_team": "942f3f85-869a-4f7a-8e5a-336365c5294b"
+      }
+    },
+    {
+      "ticker": "KXMLBGAME-26SEP101215TBATL-ATL",
+      "title": "Atlanta wins",
+      "yes_sub_title": "Atlanta",
+      "no_sub_title": "Atlanta",
+      "market_type": "binary",
+      "strike_type": "structured",
+      "status": "active",
+      "open_time": "2026-09-07T16:25:00Z",
+      "close_time": "2026-09-13T16:15:00Z",
+      "expiration_time": "2026-09-13T16:15:00Z",
+      "occurrence_datetime": "2026-09-10T19:15:00Z",
+      "result": "",
+      "can_close_early": true,
+      "settlement_timer_seconds": 120,
+      "notional_value_dollars": "1.0000",
+      "price_level_structure": "linear_cent",
+      "price_ranges": [
+        {
+          "end": "1.0000",
+          "start": "0.0000",
+          "step": "0.0100"
+        }
+      ],
+      "yes_bid_dollars": "0.5300",
+      "yes_ask_dollars": "0.5400",
+      "no_bid_dollars": "0.4600",
+      "no_ask_dollars": "0.4700",
+      "liquidity_dollars": "0.0000",
+      "rules_primary": "If Atlanta wins the Tampa Bay vs Atlanta professional baseball game originally scheduled for Sep 10, 2026 at 12:15 PM EDT, then the market resolves to Yes.",
+      "rules_secondary": "The following market refers to the Tampa Bay vs Atlanta professional baseball game originally scheduled for Sep 10, 2026 at 12:15 PM EDT. If this game is postponed or delayed, the market will remain open and close after the rescheduled game has finished (within two days). If the game is cancelled or rescheduled to over two days away, the market will resolve to a fair price in accordance with the rules.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+      "custom_strike": {
+        "baseball_team": "aa47177d-346b-4467-b8d2-dc49e284a2e6"
+      }
+    }
+  ]
+}

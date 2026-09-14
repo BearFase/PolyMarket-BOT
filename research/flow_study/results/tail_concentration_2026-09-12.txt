@@ -1,0 +1,81 @@
+================================================================================================================
+CONCENTRATION DIAGNOSTIC - 25-50c bucket, >= $1k, pregame-only, kickoff-censored
+================================================================================================================
+
+--- frozen fill level | +15m | n=42 across 21 markets ---
+    mean +0.74c; largest contributing market aec-mlb-phi-atl-2026-09-12 (5 events, sum +27.50c)
+    mean excluding that market: +0.09c over n=37 in 20 markets
+    markets with a positive mean: 3 of 21
+
+--- frozen fill level | +30m | n=29 across 17 markets ---
+    mean +1.05c; largest contributing market aec-mlb-phi-atl-2026-09-12 (5 events, sum +30.00c)
+    mean excluding that market: +0.02c over n=24 in 16 markets
+    markets with a positive mean: 3 of 17
+
+--- frozen fill level | +60m | n=22 across 14 markets ---
+    mean +1.43c; largest contributing market aec-mlb-phi-atl-2026-09-12 (5 events, sum +30.50c)
+    mean excluding that market: +0.06c over n=17 in 13 markets
+    markets with a positive mean: 2 of 14
+    every event at +60m, largest move first:
+        +7.00c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4600 $  11,304  09-12 03:33Z
+        +7.00c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4600 $   2,300  09-12 03:38Z
+        +6.50c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4650 $   5,936  09-12 03:40Z
+        +6.50c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4650 $   3,293  09-12 03:40Z
+        +3.50c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4950 $   3,689  09-12 03:43Z
+        +1.00c  aec-mlb-tex-sea-2026-09-10 LONG t0 0.4800 $   1,164  09-10 18:51Z
+        +0.50c  aec-mlb-tex-sea-2026-09-10 LONG t0 0.4800 $   2,485  09-10 18:39Z
+        +0.00c  aec-mlb-az-kc-2026-09-09 SHORT t0 0.4750 $   5,041  09-09 17:38Z
+        +0.00c  aec-mlb-chc-mil-2026-09-09 LONG t0 0.4550 $   2,518  09-09 17:39Z
+        +0.00c  aec-mlb-tor-ath-2026-09-09 SHORT t0 0.4050 $   1,931  09-09 17:57Z
+        +0.00c  aec-mlb-chc-mil-2026-09-09 LONG t0 0.4550 $   1,937  09-09 21:30Z
+        +0.00c  aec-mlb-tb-atl-2026-09-09 LONG t0 0.4650 $   1,744  09-09 21:46Z
+        +0.00c  aec-mlb-col-nyy-2026-09-09 LONG t0 0.3150 $   1,140  09-09 22:00Z
+        +0.00c  aec-mlb-chc-mil-2026-09-09 LONG t0 0.4550 $   2,232  09-09 22:11Z
+        +0.00c  aec-mlb-pit-cws-2026-09-09 LONG t0 0.4500 $   1,936  09-09 22:26Z
+        +0.00c  aec-mlb-tex-sea-2026-09-10 LONG t0 0.4550 $   1,631  09-10 07:52Z
+        +0.00c  aec-mlb-pit-chc-2026-09-11 LONG t0 0.4400 $   2,189  09-11 02:22Z
+        +0.00c  aec-mlb-nym-nyy-2026-09-11 LONG t0 0.4550 $   1,120  09-11 19:52Z
+        +0.00c  aec-mlb-phi-atl-2026-09-11 LONG t0 0.3750 $   1,525  09-11 21:09Z
+        +0.00c  aec-mlb-tex-az-2026-09-11 LONG t0 0.4850 $   1,419  09-11 23:11Z
+        +0.00c  aec-mlb-cle-min-2026-09-12 SHORT t0 0.4850 $   1,062  09-12 05:24Z
+        -0.50c  aec-mlb-tb-atl-2026-09-10 LONG t0 0.4800 $   2,812  09-10 03:36Z
+
+--- sweep cluster (post-spec) | +15m | n=44 across 22 markets ---
+    mean +0.58c; largest contributing market aec-mlb-phi-atl-2026-09-12 (4 events, sum +21.13c)
+    mean excluding that market: +0.11c over n=40 in 21 markets
+    markets with a positive mean: 8 of 22
+
+--- sweep cluster (post-spec) | +30m | n=32 across 19 markets ---
+    mean +0.79c; largest contributing market aec-mlb-phi-atl-2026-09-12 (4 events, sum +23.13c)
+    mean excluding that market: +0.08c over n=28 in 18 markets
+    markets with a positive mean: 8 of 19
+
+--- sweep cluster (post-spec) | +60m | n=24 across 16 markets ---
+    mean +1.10c; largest contributing market aec-mlb-phi-atl-2026-09-12 (4 events, sum +23.63c)
+    mean excluding that market: +0.14c over n=20 in 15 markets
+    markets with a positive mean: 6 of 16
+    every event at +60m, largest move first:
+        +7.00c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4600 $  11,502  09-12 03:33Z
+        +7.00c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4600 $   2,300  09-12 03:38Z
+        +6.50c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4650 $   9,299  09-12 03:40Z
+        +3.13c  aec-mlb-phi-atl-2026-09-12 SHORT t0 0.4987 $  17,289  09-12 03:43Z
+        +1.00c  aec-mlb-tex-sea-2026-09-10 LONG t0 0.4800 $   1,164  09-10 18:51Z
+        +1.00c  aec-mlb-hou-phi-2026-09-09 LONG t0 0.4150 $   1,880  09-09 20:05Z
+        +0.50c  aec-mlb-hou-phi-2026-09-09 LONG t0 0.4250 $   2,417  09-09 21:36Z
+        +0.50c  aec-mlb-tex-sea-2026-09-10 LONG t0 0.4800 $   2,909  09-10 18:39Z
+        +0.15c  aec-mlb-bal-tor-2026-09-12 LONG t0 0.4485 $   2,019  09-11 20:31Z
+        +0.06c  aec-mlb-cle-min-2026-09-12 SHORT t0 0.4844 $   1,236  09-12 05:24Z
+        +0.00c  aec-mlb-pit-chc-2026-09-11 LONG t0 0.4400 $   2,400  09-11 02:22Z
+        +0.00c  aec-mlb-az-kc-2026-09-09 SHORT t0 0.4750 $   5,041  09-09 17:38Z
+        +0.00c  aec-mlb-tor-ath-2026-09-09 SHORT t0 0.4050 $   1,931  09-09 17:57Z
+        +0.00c  aec-mlb-chc-mil-2026-09-09 LONG t0 0.4550 $   1,937  09-09 21:30Z
+        +0.00c  aec-mlb-tb-atl-2026-09-09 LONG t0 0.4650 $   1,744  09-09 21:46Z
+        +0.00c  aec-mlb-col-nyy-2026-09-09 LONG t0 0.3150 $   1,140  09-09 22:00Z
+        +0.00c  aec-mlb-chc-mil-2026-09-09 LONG t0 0.4550 $   2,232  09-09 22:11Z
+        +0.00c  aec-mlb-pit-cws-2026-09-09 LONG t0 0.4500 $   1,936  09-09 22:26Z
+        +0.00c  aec-mlb-tex-sea-2026-09-10 LONG t0 0.4550 $   1,930  09-10 07:52Z
+        +0.00c  aec-mlb-nym-nyy-2026-09-11 LONG t0 0.4550 $   1,452  09-11 19:52Z
+        +0.00c  aec-mlb-phi-atl-2026-09-11 LONG t0 0.3750 $   2,410  09-11 21:09Z
+        +0.00c  aec-mlb-tex-az-2026-09-11 LONG t0 0.4850 $   1,419  09-11 23:11Z
+        -0.00c  aec-mlb-chc-mil-2026-09-09 LONG t0 0.4550 $   2,518  09-09 17:39Z
+        -0.50c  aec-mlb-tb-atl-2026-09-10 LONG t0 0.4800 $   2,812  09-10 03:36Z

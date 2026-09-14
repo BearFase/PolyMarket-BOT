@@ -27,11 +27,24 @@ from system_status import (
     set_stream_state,
 )
 
+try:
+    import trade_journal
+except Exception:  # a broken journal module must never stop the tape loading
+    trade_journal = None
+
 load_dotenv()
 
 HERE = Path(__file__).parent
 DB_FILE = HERE / "big_money_tape.db"
 MLB_RESEARCH_DB_FILE = HERE / "mlb_research.db"
+# Leagues whose every delivered trade is appended to an immutable journal. MLB
+# full-flow capture is separate from the buy-only MLB journal above, which is
+# left exactly as it was.
+JOURNALED_LEAGUES = ("nfl", "mlb")
+# None keeps the journals beside DB_FILE. Tests point DB_FILE at a temporary
+# directory, so they isolate the journals automatically; a stray test row in an
+# append-only table could never be removed.
+TRADE_JOURNAL_DIR = None
 LOG_FILE = HERE / "big_money_tape.log"
 GATEWAY = "https://gateway.polymarket.us"
 WS_PATH = "/v1/ws/markets"
@@ -300,12 +313,31 @@ def _number(value):
         return 0.0
 
 
+def _trade_journal_path(league):
+    name = f"{league}_trade_journal.db"
+    if TRADE_JOURNAL_DIR:
+        return Path(TRADE_JOURNAL_DIR) / name
+    return Path(DB_FILE).with_name(name)
+
+
+def _report_trade_journal_error(message):
+    log(message)
+    mark_error("trade_journal", message)
+
+
 def record_trade(trade):
     slug = trade.get("marketSlug") or trade.get("market_slug")
     with _market_lock:
         meta = _market_map.get(slug)
     if not meta:
         return False
+    league = meta.get("league")
+    if trade_journal is not None and league in JOURNALED_LEAGUES:
+        # Journal every observed trade before the display filters below discard
+        # sells and invalid prints. journal_trade never raises.
+        trade_journal.journal_trade(
+            league, _trade_journal_path(league), trade, meta,
+            on_error=_report_trade_journal_error, on_stats=log)
     taker = trade.get("taker") or {}
     intent = taker.get("intent", "")
     if intent not in ("ORDER_INTENT_BUY_LONG", "ORDER_INTENT_BUY_SHORT"):
@@ -450,6 +482,15 @@ def run():
     init_db()
     load_known_markets()
     discover_markets()
+    if trade_journal is None:
+        _report_trade_journal_error("trade journal unavailable: module failed to import")
+    else:
+        for league in JOURNALED_LEAGUES:
+            session = trade_journal.start_capture_session(
+                league, _trade_journal_path(league), note="big_money_tape stream start",
+                on_error=_report_trade_journal_error)
+            log(f"{league.upper()} trade journal capture session "
+                f"{session or 'FAILED TO START'}")
 
     def mlb_research_sync():
         from mlb_research import MLBResearchRegistry, fetch_schedule

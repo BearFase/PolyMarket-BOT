@@ -94,7 +94,12 @@ class NFLOperationsTests(unittest.TestCase):
     def test_scheduler_scripts_are_safe_and_use_project_venv(self):
         setup = (Path(__file__).parent / "setup_task_scheduler.ps1").read_text(encoding="utf-8")
         remove = (Path(__file__).parent / "remove_task_scheduler.ps1").read_text(encoding="utf-8")
-        self.assertIn('.venv\\Scripts\\python.exe', setup)
+        # pythonw.exe, not python.exe: the console binary opened a window every hour.
+        self.assertIn('.venv\\Scripts\\pythonw.exe', setup)
+        self.assertIn("workflow_service.py", setup)
+        # Re-registering must not move the hourly cadence (it once shifted :07 to :56).
+        self.assertIn("AddMinutes(7)", setup)
+        self.assertNotIn("AddMinutes(2)", setup)
         self.assertIn("-MultipleInstances IgnoreNew", setup)
         self.assertIn("-RestartCount 3", setup)
         self.assertIn("-WorkingDirectory $Project", setup)

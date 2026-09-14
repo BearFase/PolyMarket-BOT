@@ -1,0 +1,123 @@
+{
+  "probed_at": "2026-09-10T11:57:35.410166-07:00",
+  "base_url": "https://external-api.kalshi.com/trade-api/v2",
+  "team_aliases": {
+    "JAC": "JAX",
+    "AZ": "ARI"
+  },
+  "occurrence_offset_hours": 3.0,
+  "sports": {
+    "NFL": {
+      "series_ticker": "KXNFLGAME",
+      "events_returned": 31,
+      "events_scope_game": 31,
+      "excluded_non_game": 0,
+      "link_status_counts": {
+        "EXACT": 31
+      },
+      "occurrence_offset": {
+        "status": "STABLE",
+        "expected_hours": 3.0,
+        "observed_hours": [
+          3.0
+        ],
+        "sample": 31
+      },
+      "books_sampled": 3,
+      "books_two_sided": 3,
+      "transform_checks": {
+        "CONFIRMED": 3
+      },
+      "spread": {
+        "min": 0.01,
+        "median": 0.01,
+        "max": 0.01
+      },
+      "top_level_quantity": {
+        "min": 0.17,
+        "median": 10049.52,
+        "max": 9073276.62
+      },
+      "examples": [
+        {
+          "event_ticker": "KXNFLGAME-26SEP10SFLAR",
+          "teams": [
+            "LAR",
+            "SF"
+          ],
+          "markets": 2,
+          "mutually_exclusive": true,
+          "status": "EXACT",
+          "registry_id": "NFL-2026-REG-W1-SF-LAR",
+          "registry_start": "2026-09-11T00:35:00+00:00",
+          "book": {
+            "yes_levels": 20,
+            "no_levels": 20,
+            "best_yes_bid": 0.64,
+            "best_no_bid": 0.35,
+            "yes_ask": 0.65,
+            "no_ask": 0.36,
+            "spread": 0.01,
+            "top_yes_qty": 1412054.47,
+            "top_no_qty": 9073276.62,
+            "yes_qty_top5": 1796442.02,
+            "no_qty_top5": 17686754.24
+          },
+          "transform_check": "CONFIRMED"
+        },
+        {
+          "event_ticker": "KXNFLGAME-26SEP13ATLPIT",
+          "teams": [
+            "PIT",
+            "ATL"
+          ],
+          "markets": 2,
+          "mutually_exclusive": true,
+          "status": "EXACT",
+          "registry_id": "NFL-2026-REG-W1-ATL-PIT",
+          "registry_start": "2026-09-13T17:00:00+00:00",
+          "book": {
+            "yes_levels": 20,
+            "no_levels": 20,
+            "best_yes_bid": 0.65,
+            "best_no_bid": 0.34,
+            "yes_ask": 0.66,
+            "no_ask": 0.35,
+            "spread": 0.01,
+            "top_yes_qty": 10512.61,
+            "top_no_qty": 0.17,
+            "yes_qty_top5": 253550.17,
+            "no_qty_top5": 320120.03
+          },
+          "transform_check": "CONFIRMED"
+        },
+        {
+          "event_ticker": "KXNFLGAME-26SEP13BALIND",
+          "teams": [
+            "IND",
+            "BAL"
+          ],
+          "markets": 2,
+          "mutually_exclusive": true,
+          "status": "EXACT",
+          "registry_id": "NFL-2026-REG-W1-BAL-IND",
+          "registry_start": "2026-09-13T17:00:00+00:00",
+          "book": {
+            "yes_levels": 20,
+            "no_levels": 20,
+            "best_yes_bid": 0.38,
+            "best_no_bid": 0.61,
+            "yes_ask": 0.39,
+            "no_ask": 0.62,
+            "spread": 0.01,
+            "top_yes_qty": 183771.14,
+            "top_no_qty": 10049.52,
+            "yes_qty_top5": 331344.12,
+            "no_qty_top5": 409285.93
+          },
+          "transform_check": "CONFIRMED"
+        }
+      ]
+    }
+  }
+}

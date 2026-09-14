@@ -89,7 +89,7 @@ def calculate_edges(registry: NFLRegistry, *, now: datetime | None = None) -> di
     for row in rows:
         paired.setdefault(row["game_uuid"], row)
 
-    edges, skipped = [], {"stale": 0, "incomplete_prices": 0}
+    edges, skipped = [], {"stale": 0, "incomplete_prices": 0, "incoherent_prices": 0}
     for row in paired.values():
         if not (_fresh(row["odds_observed"], now, max_age)
                 and _fresh(row["polymarket_observed"], now, max_age)):
@@ -105,6 +105,21 @@ def calculate_edges(registry: NFLRegistry, *, now: datetime | None = None) -> di
         if (any(not isinstance(book_probs[t], (int, float)) for t in book_probs)
                 or set(market_prices) != set(book_probs)):
             skipped["incomplete_prices"] += 1
+            continue
+        # Both side prices must form a coherent probability pair before either
+        # can be compared with a vig-free book consensus. Polymarket US does
+        # not publish a price per team here: `outcomePrices` is the bid and the
+        # ask of a SINGLE side, while `outcomes` carries two team names whose
+        # order does not track the prices. Both published numbers therefore
+        # describe the same team, arrive one tick apart, and sum to anything
+        # but one. Measured against Kalshi as an independent reference, the
+        # first entry sits a median 0.010 from that game's away-team price and
+        # 0.345 from the home team's. Read as two teams' probabilities they
+        # produce enormous fictional edges: on 2026-09-08 this yielded 25
+        # "edges" between 40 and 69 percentage points.
+        pair_total = sum(market_prices.values())
+        if not 0.97 <= pair_total <= 1.03:
+            skipped["incoherent_prices"] += 1
             continue
         team_names = {
             row["away_team_id"]: row["away_team_name"],

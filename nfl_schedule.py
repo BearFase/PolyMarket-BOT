@@ -1021,18 +1021,43 @@ def polymarket_us_records(payload: dict, season: int, season_type: Optional[str]
     return records
 
 
+POLYMARKET_PAGE_SIZE = 500
+POLYMARKET_MAX_PAGES = 20
+
+
 def fetch_polymarket_us(session=requests, season: Optional[int] = None) -> dict:
+    """Discover Polymarket US NFL events for a whole season.
+
+    The window has to reach into the following calendar year: an NFL season
+    starts in July and ends at the Super Bowl in February. A window closing
+    inside the season silently yields preseason-only links, which produces
+    zero verified same-game source pairs and therefore zero edges, with no
+    error anywhere to explain it.
+
+    The endpoint caps a page at its `limit`, so results are paged through
+    `offset` until a short page arrives. Without paging, a season's markets
+    are truncated at the cap and the missing games look like rejections that
+    never happened.
+    """
     season = season or load_config()["nfl_season"]
-    response = session.get(POLYMARKET_US_EVENTS, params={
-        "tagSlug": "nfl", "limit": 100,
-        "startTimeMin": f"{season}-07-01T00:00:00Z",
-        "startTimeMax": f"{season}-09-06T00:00:00Z",
-    }, timeout=25)
-    response.raise_for_status()
-    payload = response.json()
-    if not isinstance(payload, dict):
-        raise ValueError("Polymarket US returned non-object JSON")
-    return payload
+    events: list = []
+    for page in range(POLYMARKET_MAX_PAGES):
+        response = session.get(POLYMARKET_US_EVENTS, params={
+            "tagSlug": "nfl",
+            "limit": POLYMARKET_PAGE_SIZE,
+            "offset": page * POLYMARKET_PAGE_SIZE,
+            "startTimeMin": f"{season}-07-01T00:00:00Z",
+            "startTimeMax": f"{season + 1}-03-01T00:00:00Z",
+        }, timeout=25)
+        response.raise_for_status()
+        payload = response.json()
+        if not isinstance(payload, dict):
+            raise ValueError("Polymarket US returned non-object JSON")
+        batch = payload.get("events") or []
+        events.extend(batch)
+        if len(batch) < POLYMARKET_PAGE_SIZE:
+            break
+    return {"events": events}
 
 
 def refresh_game_flow_activity(registry: NFLRegistry,

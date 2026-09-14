@@ -10,7 +10,7 @@ Runtime files remain on disk and are intentionally excluded from Git.
 
 `big_money_tape.py`, `dashboard_data.py`, `monitor_positions.py`,
 `nfl_daily_update.py`, `nfl_operations.py`, `nfl_postgame_research.py`,
-`nfl_research_report.py`, `nfl_schedule.py`, `paper_trader.py`,
+`nfl_research_report.py`, `nfl_schedule.py`, `trade_journal.py`, `paper_trader.py`,
 `price_history.py`, `settle_positions.py`, `sports_edge_finder.py`,
 `sync_positions_api.py`, `system_status.py`, and
 `telegram_notification_center.py`.
@@ -29,6 +29,7 @@ NFL-registry scanner, not the retired title-matching implementation.
 
 `bot_launcher.py`, `Open Dashboard.cmd`, `Start All Bots.cmd`,
 `health_check.py`, `setup_task_scheduler.ps1`, `remove_task_scheduler.ps1`,
+`workflow_service.py`,
 `get_positions.py`, `telegram_setup.py`, and `test_all_systems.py`.
 
 `Open Dashboard.cmd` is the canonical one-click UI launcher.
@@ -58,7 +59,8 @@ under `tests/fixtures/` are active tests or deterministic fixtures.
 - Real positions and UI state: `real_positions.json`, `price_history.json`,
   `monitor_state.json`, `system_status.json`, `sports_edges.json`,
   `todays_games.json`, and `whale_data.json`.
-- Trade/history databases: `big_money_tape.db` and `trader_scanner.db`.
+- Trade/history databases: `big_money_tape.db`, `trader_scanner.db`, and the
+  append-only `nfl_trade_journal.db` and `mlb_trade_journal.db`.
 - Operational state: every file under `.runtime/`, including
   `nfl_workflow_state.json`, `nfl_maintenance.json`, and dashboard PID state.
 - Logs: every root `*.log`, `monitor_log.txt`, and every file under `logs/`.
@@ -135,7 +137,8 @@ dynamic-file review.
 - Flask serves both dashboard HTML files, three JavaScript bundles, generated
   dashboard data, real positions, sports edges, system status, Game Flow, and
   post-game research APIs.
-- Task Scheduler calls `.venv/Scripts/python.exe nfl_daily_update.py` with the
+- Task Scheduler calls `.venv/Scripts/pythonw.exe workflow_service.py`, which
+  runs `nfl_daily_update.py` without opening a console window, with the
   repository as its working directory.
 - The NFL workflow imports the canonical registry, operational safeguards,
   post-game research, simulation report, paper settlement engine, and Telegram
